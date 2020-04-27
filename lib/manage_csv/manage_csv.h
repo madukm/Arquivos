@@ -4,8 +4,8 @@
 #include "../binarioNaTela/binarioNaTela.h"
 
 struct _registro{
-	char *cidadeMae;
-	char *cidadeBebe;
+	char cidadeMae[105];
+	char cidadeBebe[105];
 	int idNascimento;
 	int idadeMae;
 	char dataNascimento[10];
