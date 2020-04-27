@@ -26,3 +26,15 @@ void escreve_data(FILE* fp, char data[SIZE_DATA]) {
 
     fwrite(data, sizeof(char), SIZE_DATA, fp);
 }
+
+void escreve_sexo(FILE* fp, char sexo) {
+    if (fp == NULL) return;
+
+    fwrite(&sexo, sizeof(char), 1, fp);
+}
+
+void escreve_estado(FILE* fp, char estado[SIZE_ESTADO]) {
+    if (fp == NULL) return;
+
+    fwrite(estado, sizeof(char), SIZE_ESTADO, fp);
+}
