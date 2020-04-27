@@ -38,3 +38,23 @@ void escreve_estado(FILE* fp, char estado[SIZE_ESTADO]) {
 
     fwrite(estado, sizeof(char), SIZE_ESTADO, fp);
 }
+
+void escreve_registro(FILE* fp, Registro* reg) {
+    if (fp == NULL) return;
+
+    escreve_inteiro(fp, reg->tamanhoCidadeMae);
+    escreve_inteiro(fp, reg->tamanhoCidadeBebe);
+
+    escreve_cidade(fp, reg->cidadeMae, reg->tamanhoCidadeMae);
+    escreve_cidade(fp, reg->cidadeBebe, reg->tamanhoCidadeBebe);
+    
+    escreve_inteiro(fp, reg->idNascimento);
+    escreve_inteiro(fp, reg->idadeMae);
+
+    escreve_data(fp, reg->dataNascimento);
+
+    escreve_sexo(fp, reg->sexoBebe);
+
+    escreve_estado(fp, reg->estadoMae);
+    escreve_estado(fp, reg->estadoBebe);
+}

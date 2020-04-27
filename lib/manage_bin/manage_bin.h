@@ -9,4 +9,6 @@ void escreve_data(FILE* fp, char data[SIZE_DATA]);
 void escreve_sexo(FILE* fp, char sexo);
 void escreve_estado(FILE* fp, char estado[SIZE_ESTADO]);
 
+void escreve_registro(FILE* fp, Registro* reg);
+
 #endif
