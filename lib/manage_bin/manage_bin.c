@@ -64,3 +64,10 @@ void le_inteiro_bin(FILE* fp, int* number) {
 
     fread(number, sizeof(int), 1, fp);
 }
+
+void le_cidade_bin(FILE* fp, char cidade[MAX_CIDADE], int size) {
+    if (fp == NULL) return;
+
+    fread(cidade, sizeof(char), MAX_CIDADE, fp);
+    cidade[size] = '\0';
+}
