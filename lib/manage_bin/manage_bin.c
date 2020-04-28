@@ -87,5 +87,25 @@ void le_sexo_bin(FILE* fp, char* sexo) {
 void le_estado_bin(FILE* fp, char estado[SIZE_ESTADO]) {
     if (fp == NULL) return;
 
-    fwrite(estado, sizeof(char), SIZE_ESTADO, fp);
+    fread(estado, sizeof(char), SIZE_ESTADO, fp);
+}
+
+void le_registro_bin(FILE* fp, Registro* reg) {
+    if (fp == NULL) return;
+
+    le_inteiro_bin(fp, &(reg->tamanhoCidadeMae));
+    le_inteiro_bin(fp, &(reg->tamanhoCidadeBebe));
+
+    le_cidade_bin(fp, reg->cidadeMae, reg->tamanhoCidadeMae);
+    le_cidade_bin(fp, reg->cidadeBebe, reg->tamanhoCidadeBebe);
+    
+    le_inteiro_bin(fp, &(reg->idNascimento));
+    le_inteiro_bin(fp, &(reg->idadeMae));
+
+    le_data_bin(fp, reg->dataNascimento);
+
+    le_sexo_bin(fp, &(reg->sexoBebe));
+
+    le_estado_bin(fp, reg->estadoMae);
+    le_estado_bin(fp, reg->estadoBebe);
 }
