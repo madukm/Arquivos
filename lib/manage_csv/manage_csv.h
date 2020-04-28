@@ -1,6 +1,8 @@
 #ifndef _H_MANAGE_CSV
 #define _H_MANAGE_CSV
 
+#include "../binarioNaTela/binarioNaTela.h"
+
 struct _registro{
 	char *cidadeMae;
 	char *cidadeBebe;
@@ -20,6 +22,9 @@ struct _cabecalho{
 };
 
 typedef struct _cabecalho Cabecalho;
+
+//Funções auxiliares
+void 
 
 //Funcionalidade 1:
 
