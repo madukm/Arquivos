@@ -77,3 +77,9 @@ void le_data_bin(FILE* fp, char data[SIZE_DATA]) {
 
     fread(data, sizeof(char), SIZE_DATA, fp);
 }
+
+void le_sexo_bin(FILE* fp, char* sexo) {
+    if (fp == NULL) return;
+
+    fread(sexo, sizeof(char), 1, fp);
+}
