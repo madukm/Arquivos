@@ -71,3 +71,9 @@ void le_cidade_bin(FILE* fp, char cidade[MAX_CIDADE], int size) {
     fread(cidade, sizeof(char), MAX_CIDADE, fp);
     cidade[size] = '\0';
 }
+
+void le_data_bin(FILE* fp, char data[SIZE_DATA]) {
+    if (fp == NULL) return;
+
+    fread(data, sizeof(char), SIZE_DATA, fp);
+}
