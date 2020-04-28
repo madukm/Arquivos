@@ -83,3 +83,9 @@ void le_sexo_bin(FILE* fp, char* sexo) {
 
     fread(sexo, sizeof(char), 1, fp);
 }
+
+void le_estado_bin(FILE* fp, char estado[SIZE_ESTADO]) {
+    if (fp == NULL) return;
+
+    fwrite(estado, sizeof(char), SIZE_ESTADO, fp);
+}
