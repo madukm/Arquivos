@@ -44,4 +44,6 @@ char *le_estado(FILE *file);
 void le_primeira_linha(FILE *file);
 Registro *le_registro(FILE *file);
 
+Cabecalho *criar_cabecalho();
+
 #endif
