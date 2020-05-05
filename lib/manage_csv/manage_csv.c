@@ -137,23 +137,3 @@ void print_registro(Registro *r){
 	printf("estadoMae = %s\n", r->estadoMae);
 	printf("estadoBebe = %s\n\n", r->estadoBebe);
 }
-
-int main(){
-	FILE *fp;
-	fp = fopen("../../CasosAbertos/arq02.csv", "r");
-	if(fp == NULL){
-		printf("erro\n");
-		exit(0);
-	}
-	fseek(fp, 0, SEEK_SET);
-	le_primeira_linha(fp);
-	Registro *reg;
-	for(int i=0; i<3; i++){
-		reg = le_registro(fp);
-		print_registro(reg);
-		free(reg);
-	}
-	fclose(fp);
-	return 0;
-}
-
