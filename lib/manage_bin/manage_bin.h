@@ -1,6 +1,8 @@
 #ifndef _H_MANAGE_BIN
 #define _H_MANAGE_BIN
 
+#define ERROR_MSG "Falha no processamento do arquivo."
+
 #include "../manage_csv/manage_csv.h"
 
 FILE* abrir_bin(char path[], Cabecalho** cab, char op);
