@@ -2,6 +2,26 @@
 #include "manage_bin.h"
 //#include "../manage_csv/manage_csv.h"
 
+// FILE* abrir_bin(char path[], Cabecalho* cab, char op) {
+//     FILE* fp = NULL;
+
+//     switch (op)
+//     {
+//     case 'w':
+//         fp = fopen(path, "w+b");
+//         break;
+//     case 'r':
+//         fp = fopen(path, "rb");
+
+
+//         break;
+//     default:
+//         break;
+//     }   
+
+//     return fp;
+// }
+
 void escreve_cidade_bin(FILE* fp, char cidade[MAX_CIDADE], int size) {
     if (fp == NULL) return;
     
@@ -27,10 +47,10 @@ void escreve_data_bin(FILE* fp, char data[SIZE_DATA]) {
     fwrite(data, sizeof(char), SIZE_DATA, fp);
 }
 
-void escreve_sexo_bin(FILE* fp, char sexo) {
+void escreve_char_bin(FILE* fp, char ch) {
     if (fp == NULL) return;
 
-    fwrite(&sexo, sizeof(char), 1, fp);
+    fwrite(&ch, sizeof(char), 1, fp);
 }
 
 void escreve_estado_bin(FILE* fp, char estado[SIZE_ESTADO]) {
@@ -53,7 +73,7 @@ void escreve_registro_bin(FILE* fp, Registro* reg) {
 
     escreve_data_bin(fp, reg->dataNascimento);
 
-    escreve_sexo_bin(fp, reg->sexoBebe);
+    escreve_char_bin(fp, reg->sexoBebe);
 
     escreve_estado_bin(fp, reg->estadoMae);
     escreve_estado_bin(fp, reg->estadoBebe);
@@ -78,10 +98,10 @@ void le_data_bin(FILE* fp, char data[SIZE_DATA]) {
     fread(data, sizeof(char), SIZE_DATA, fp);
 }
 
-void le_sexo_bin(FILE* fp, char* sexo) {
+void le_char_bin(FILE* fp, char* ch) {
     if (fp == NULL) return;
 
-    fread(sexo, sizeof(char), 1, fp);
+    fread(ch, sizeof(char), 1, fp);
 }
 
 void le_estado_bin(FILE* fp, char estado[SIZE_ESTADO]) {
@@ -104,8 +124,9 @@ void le_registro_bin(FILE* fp, Registro* reg) {
 
     le_data_bin(fp, reg->dataNascimento);
 
-    le_sexo_bin(fp, &(reg->sexoBebe));
+    le_char_bin(fp, &(reg->sexoBebe));
 
     le_estado_bin(fp, reg->estadoMae);
     le_estado_bin(fp, reg->estadoBebe);
+
 }
