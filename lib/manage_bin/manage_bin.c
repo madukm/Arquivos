@@ -10,16 +10,27 @@ FILE* abrir_bin(char path[], Cabecalho** cab, char op) {
     case 'w':
         fp = fopen(path, "w+b");
         escreve_char_bin(fp, '0');
-        fseek(fp, SEEK_CUR, 127);
+        fseek(fp, 127, SEEK_CUR);
         *cab = criar_cabecalho();
         break;
     case 'r':
-        fp = fopen(path, "rb");
+        fp = fopen(path, "r+b");
+        if (fp == NULL) {
+            printf("Falha no processamento do arquivo.");
+            return NULL;
+        }
+        *cab = criar_cabecalho();
         le_char_bin(fp, &((*cab)->status));
+        if ((*cab)->status == '0') {
+            printf("Falha no processamento do arquivo.");
+            fclose(fp);
+            return NULL;
+        }
         le_inteiro_bin(fp, &((*cab)->RRNproxRegistro));
         le_inteiro_bin(fp, &((*cab)->numeroRegistrosInseridos));
         le_inteiro_bin(fp, &((*cab)->numeroRegistrosRemovidos));
         le_inteiro_bin(fp, &((*cab)->numeroRegistrosAtualizados));
+        fseek(fp, 128, SEEK_SET);
         break;
     default:
         break;
@@ -115,45 +126,49 @@ void escreve_registro_bin(FILE* fp, Registro* reg, Cabecalho* cab) {
     cab->numeroRegistrosInseridos += 1;
 }
 
-void le_inteiro_bin(FILE* fp, int* number) {
-    if (fp == NULL) return;
+int le_inteiro_bin(FILE* fp, int* number) {
+    if (fp == NULL) return 0;
 
-    fread(number, sizeof(int), 1, fp);
+    return fread(number, sizeof(int), 1, fp);
 }
 
-void le_str_bin(FILE* fp, char str[MAX_CIDADE], int size) {
-    if (fp == NULL) return;
+int le_str_bin(FILE* fp, char str[MAX_CIDADE], int size) {
+    if (fp == NULL) return 0;
 
-    fread(str, sizeof(char), MAX_CIDADE, fp);
+    int leu = fread(str, sizeof(char), size, fp);
     str[size] = '\0';
+    return leu;
 }
 
-void le_data_bin(FILE* fp, char data[SIZE_DATA]) {
-    if (fp == NULL) return;
+int le_data_bin(FILE* fp, char data[SIZE_DATA]) {
+    if (fp == NULL) return 0;
 
-    fread(data, sizeof(char), SIZE_DATA, fp);
+    return fread(data, sizeof(char), SIZE_DATA, fp);
 }
 
-void le_char_bin(FILE* fp, char* ch) {
-    if (fp == NULL) return;
+int le_char_bin(FILE* fp, char* ch) {
+    if (fp == NULL) return 0;
 
-    fread(ch, sizeof(char), 1, fp);
+    return fread(ch, sizeof(char), 1, fp);
 }
 
-void le_estado_bin(FILE* fp, char estado[SIZE_ESTADO]) {
-    if (fp == NULL) return;
+int le_estado_bin(FILE* fp, char estado[SIZE_ESTADO]) {
+    if (fp == NULL) return 0;
 
-    fread(estado, sizeof(char), SIZE_ESTADO, fp);
+    return fread(estado, sizeof(char), SIZE_ESTADO, fp);
 }
 
-void le_registro_bin(FILE* fp, Registro* reg) {
-    if (fp == NULL) return;
+int le_registro_bin(FILE* fp, Registro* reg) {
+    if (fp == NULL) return 0;
 
-    le_inteiro_bin(fp, &(reg->tamanhoCidadeMae));
-    le_inteiro_bin(fp, &(reg->tamanhoCidadeBebe));
-
+    int leu = 0;
+    leu = le_inteiro_bin(fp, &(reg->tamanhoCidadeMae));
+    if (!leu) return 0;
+    leu = le_inteiro_bin(fp, &(reg->tamanhoCidadeBebe));
+    if (!leu) return 0;
     le_str_bin(fp, reg->cidadeMae, reg->tamanhoCidadeMae);
     le_str_bin(fp, reg->cidadeBebe, reg->tamanhoCidadeBebe);
+    fseek(fp, MAX_CIDADE - (reg->tamanhoCidadeMae) - (reg->tamanhoCidadeBebe) - 8, SEEK_CUR);
     
     le_inteiro_bin(fp, &(reg->idNascimento));
     le_inteiro_bin(fp, &(reg->idadeMae));
@@ -164,5 +179,6 @@ void le_registro_bin(FILE* fp, Registro* reg) {
 
     le_estado_bin(fp, reg->estadoMae);
     le_estado_bin(fp, reg->estadoBebe);
-
+    return 1;
+    
 }

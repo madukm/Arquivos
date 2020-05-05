@@ -15,13 +15,13 @@ void escreve_estado_bin(FILE* fp, char estado[SIZE_ESTADO]);
 
 void escreve_registro_bin(FILE* fp, Registro* reg, Cabecalho* cab);
 
-void le_str_bin(FILE* fp, char str[MAX_CIDADE], int size);
-void le_inteiro_bin(FILE* fp, int* number);
-void le_data_bin(FILE* fp, char data[SIZE_DATA]);
-void le_char_bin(FILE* fp, char* ch);
-void le_estado_bin(FILE* fp, char estado[SIZE_ESTADO]);
+int le_str_bin(FILE* fp, char str[MAX_CIDADE], int size);
+int le_inteiro_bin(FILE* fp, int* number);
+int le_data_bin(FILE* fp, char data[SIZE_DATA]);
+int le_char_bin(FILE* fp, char* ch);
+int le_estado_bin(FILE* fp, char estado[SIZE_ESTADO]);
 
-void le_registro_bin(FILE* fp, Registro* reg);
+int le_registro_bin(FILE* fp, Registro* reg);
 
 
 
