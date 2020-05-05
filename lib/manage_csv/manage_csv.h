@@ -34,17 +34,19 @@ struct _cabecalho{
 typedef struct _cabecalho Cabecalho;
 
 
-char *read_string(FILE *file, int tamanho);
-int read_int(FILE *file);
+char *le_string(FILE *file, int tamanho);
+int le_int(FILE *file);
+char le_char(FILE *file);
 
 char *le_cidade(FILE *file, int *size_cidade);
 char *le_data(FILE *file);
 char le_sexo(FILE *file);
 char *le_estado(FILE *file);
+int le_id(FILE *file, int *retorno_fscanf);
 void le_primeira_linha(FILE *file);
-Registro *le_registro(FILE *file);
+Registro *le_registro(FILE *file, int *retorno_fscanf);
 
 Cabecalho *criar_cabecalho();
 void print_registro(Registro *r);
-
 #endif
+

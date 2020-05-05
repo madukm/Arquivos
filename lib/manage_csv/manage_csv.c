@@ -82,23 +82,35 @@ char *le_estado(FILE *file){
 	return le_string(file, SIZE_ESTADO);
 }
 
+int le_id(FILE *file, int *retorno_fscanf){
+	if(file == NULL){
+		printf("Falha de carregamento no arquivo.\n");
+		return -1;
+	}
+	int n;
+	*retorno_fscanf = fscanf(file, "%d", &n);
+	fseek(file, 1, SEEK_CUR); //pula a vírgula no arquivo
+	return n;
+}
+
 //Função que lê a primeira linha do arquivo que contêm os nomes dos campos dos registros.
 void le_primeira_linha(FILE *file){
-	char *str = (char *)malloc(90*sizeof(int));
-	fscanf(file, "%s", str);
+//	char *str;
+//	str = (char *)malloc(90*sizeof(char));
+	fscanf(file, "%*s");
 	fseek(file, 1, SEEK_CUR);
-	free(str);	
+//	free(str);
 }
 
 //Função que lê uma linha do arquivo csv e coloca os campos num registro.
-Registro *le_registro(FILE *file){
+Registro *le_registro(FILE *file, int *retorno_fscanf){
 	Registro *reg = (Registro *)malloc(sizeof(Registro));
 	if(reg == NULL) return reg;
 	int *size_cidadeMae, *size_cidadeBebe;
 	char *aux;
 	size_cidadeMae = (int *)malloc(sizeof(int));
 	size_cidadeBebe = (int *)malloc(sizeof(int));
-
+	
 	aux = le_cidade(file, size_cidadeMae);
 	strcpy(reg->cidadeMae, aux);
 	free(aux);
@@ -113,7 +125,7 @@ Registro *le_registro(FILE *file){
 	if (size_cidadeMae) free(size_cidadeMae);
 	if (size_cidadeBebe) free(size_cidadeBebe);
 
-	reg->idNascimento = le_int(file);
+	reg->idNascimento = le_id(file, retorno_fscanf);
 	
 	reg->idadeMae = le_int(file);
 	
@@ -144,3 +156,20 @@ void print_registro(Registro *r){
 	printf("estadoMae = %s\n", r->estadoMae);
 	printf("estadoBebe = %s\n\n", r->estadoBebe);
 }
+
+/*int main(){
+	FILE *fp;
+	fp = fopen("../../CasosAbertos/arq02.csv", "r");
+	fseek(fp, 0, SEEK_SET);
+	le_primeira_linha(fp);
+	Registro *reg;
+	int *retorno_fscanf;
+	retorno_fscanf = (int *)malloc(sizeof(int));
+	do{
+		reg = le_registro(fp, retorno_fscanf);
+		print_registro(reg);
+		free(reg);
+	}while(*retorno_fscanf >= 0);
+	fclose(fp);
+	return 0;
+}*/
