@@ -4,7 +4,7 @@
 #include "../manage_csv/manage_csv.h"
 
 FILE* abrir_bin(char path[], Cabecalho** cab, char op);
-void fecha__bin(FILE* fp, Cabecalho* cab, char op);
+void fecha_bin(FILE* fp, Cabecalho* cab, char op);
 
 
 void escreve_str_bin(FILE* fp, char str[MAX_CIDADE], int size);

@@ -10,7 +10,7 @@ FILE* abrir_bin(char path[], Cabecalho** cab, char op) {
     case 'w':
         fp = fopen(path, "w+b");
         escreve_char_bin(fp, '0');
-        fseek(fp, SEEK_CUR, 127);
+        fseek(fp, 127, SEEK_CUR);
         *cab = criar_cabecalho();
         break;
     case 'r':
@@ -28,7 +28,7 @@ FILE* abrir_bin(char path[], Cabecalho** cab, char op) {
     return fp;
 }
 
-void fecha__bin(FILE* fp, Cabecalho* cab, char op) {
+void fecha_bin(FILE* fp, Cabecalho* cab, char op) {
     char null_ch = '$';
 
     switch (op)
