@@ -45,5 +45,6 @@ void le_primeira_linha(FILE *file);
 Registro *le_registro(FILE *file);
 
 Cabecalho *criar_cabecalho();
+void print_registro(Registro *r);
 
 #endif

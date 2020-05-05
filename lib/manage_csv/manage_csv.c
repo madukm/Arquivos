@@ -27,6 +27,7 @@ char *le_string(FILE *file, int tamanho){
 	}
 	char *str;
 	str = (char *)malloc((tamanho+1) * sizeof(char));
+	str[0] = '\0';
 	fscanf(file, "%[^,^\n]s", str);
 	fseek(file, 1, SEEK_CUR); //pula a vírgula no arquivo
 	return str;
@@ -49,8 +50,14 @@ char le_char(FILE *file){
 	if(file == NULL) return -1;
 	char c;
 	fscanf(file, "%c", &c);
-	fseek(file, 1, SEEK_CUR);//pula a vírgula no arquivo
+	if (c != ',') {
+		fseek(file, 1, SEEK_CUR);//pula a vírgula no arquivo
+	}
+	else {
+		c = '-';
+	}
 	return c;
+
 }
 
 //A função lê a string com o nome da cidade e modifica o parametro size_cidade que representa o tamanho dessa string.
@@ -95,15 +102,16 @@ Registro *le_registro(FILE *file){
 	aux = le_cidade(file, size_cidadeMae);
 	strcpy(reg->cidadeMae, aux);
 	free(aux);
-	
+
 	aux = le_cidade(file, size_cidadeBebe);
 	strcpy(reg->cidadeBebe, aux);
 	free(aux);
+
 	
 	reg->tamanhoCidadeMae = *size_cidadeMae;
 	reg->tamanhoCidadeBebe = *size_cidadeBebe;
-	free(size_cidadeMae);
-	free(size_cidadeBebe);
+	if (size_cidadeMae) free(size_cidadeMae);
+	if (size_cidadeBebe) free(size_cidadeBebe);
 
 	reg->idNascimento = le_int(file);
 	
@@ -112,17 +120,16 @@ Registro *le_registro(FILE *file){
 	aux = le_data(file); 
 	strcpy(reg->dataNascimento, aux);
 	free(aux);
-	
 	reg->sexoBebe = le_sexo(file);
 	
 	aux = le_estado(file);
 	strcpy(reg->estadoMae, aux);
 	free(aux);
-	
+
 	aux = le_estado(file);
 	strcpy(reg->estadoBebe, aux);
 	free(aux);
-	
+
 	return reg;
 }
 
