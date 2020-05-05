@@ -141,6 +141,6 @@ void print_registro(Registro *r){
 	printf("idadeMae = %d\n", r->idadeMae);
 	printf("dataNascimento = %s\n", r->dataNascimento);
 	printf("sexo = %c\n", r->sexoBebe);
-	printf("estadoMae = %s\n", r->estadoMae);
-	printf("estadoBebe = %s\n\n", r->estadoBebe);
+	printf("estadoMae = %.2s\n", r->estadoMae);
+	printf("estadoBebe = %.2s\n\n", r->estadoBebe);
 }
