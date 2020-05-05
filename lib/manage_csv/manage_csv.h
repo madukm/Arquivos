@@ -48,5 +48,5 @@ Registro *le_registro(FILE *file, int *retorno_fscanf);
 
 Cabecalho *criar_cabecalho();
 void print_registro(Registro *r);
-#endif
 
+#endif
