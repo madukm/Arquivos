@@ -20,10 +20,15 @@ void funcionalidade1(char *path_1, char *path_2, Cabecalho *cab){
 	le_primeira_linha(csv_fp);
 	while(1){
 		reg = le_registro(csv_fp, retorno_fscanf);
-		if(*retorno_fscanf >= 0)
+		if(*retorno_fscanf >= 0){
+//			print_registro(reg);
 			escreve_registro_bin(bin_fp, reg, cab);
-		else
+			free(reg);
+		}
+		else{
+			free(reg);
 			break;
+		}
 	}
 	free(retorno_fscanf);
 	fecha__bin(bin_fp, cab, 'w');
