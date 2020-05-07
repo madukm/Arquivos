@@ -4,7 +4,7 @@
 #include "../binarioNaTela/binarioNaTela.h"
 
 #define SIZE_DATA 10
-#define MAX_CIDADE 105
+#define MAX_CIDADE 48
 #define SIZE_ESTADO 2
 #define SIZE_REGISTRO 128
 

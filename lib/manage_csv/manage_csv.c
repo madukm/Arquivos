@@ -40,7 +40,8 @@ int le_int(FILE *file){
 		return -1;
 	}
 	int n;
-	fscanf(file, "%d", &n);
+	if(fscanf(file, "%d", &n) <= 0)
+		n = -1;
 	fseek(file, 1, SEEK_CUR); //pula a vírgula no arquivo
 	return n;
 }
@@ -54,7 +55,7 @@ char le_char(FILE *file){
 		fseek(file, 1, SEEK_CUR);//pula a vírgula no arquivo
 	}
 	else {
-		c = '-';
+		c = '0';
 	}
 	return c;
 
@@ -95,11 +96,8 @@ int le_id(FILE *file, int *retorno_fscanf){
 
 //Função que lê a primeira linha do arquivo que contêm os nomes dos campos dos registros.
 void le_primeira_linha(FILE *file){
-//	char *str;
-//	str = (char *)malloc(90*sizeof(char));
 	fscanf(file, "%*s");
 	fseek(file, 1, SEEK_CUR);
-//	free(str);
 }
 
 //Função que lê uma linha do arquivo csv e coloca os campos num registro.
@@ -129,9 +127,11 @@ Registro *le_registro(FILE *file, int *retorno_fscanf){
 	
 	reg->idadeMae = le_int(file);
 	
-	aux = le_data(file); 
+
+	aux = le_data(file);
 	strcpy(reg->dataNascimento, aux);
 	free(aux);
+	
 	reg->sexoBebe = le_sexo(file);
 	
 	aux = le_estado(file);
@@ -157,19 +157,3 @@ void print_registro(Registro *r){
 	printf("estadoBebe = %.2s\n\n", r->estadoBebe);
 }
 
-/*int main(){
-	FILE *fp;
-	fp = fopen("../../CasosAbertos/arq02.csv", "r");
-	fseek(fp, 0, SEEK_SET);
-	le_primeira_linha(fp);
-	Registro *reg;
-	int *retorno_fscanf;
-	retorno_fscanf = (int *)malloc(sizeof(int));
-	do{
-		reg = le_registro(fp, retorno_fscanf);
-		print_registro(reg);
-		free(reg);
-	}while(*retorno_fscanf >= 0);
-	fclose(fp);
-	return 0;
-}*/
