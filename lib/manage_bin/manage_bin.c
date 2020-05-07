@@ -22,7 +22,7 @@ FILE* abrir_bin(char path[], Cabecalho** cab, char op) {
     case 'w':
         fp = fopen(path, "w+b");
         escreve_char_bin(fp, '0');
-        fseek(fp, 127, SEEK_CUR);
+		fseek(fp, 127, SEEK_CUR);
         *cab = criar_cabecalho();
         break;
     case 'r':
@@ -65,7 +65,7 @@ void fecha__bin(FILE* fp, Cabecalho* cab, char op) {
     switch (op)
     {
     case 'w':
-        rewind(fp);
+        fseek(fp, 0, SEEK_SET);
         escreve_char_bin(fp, '1');
         escreve_inteiro_bin(fp, cab->RRNproxRegistro);
         escreve_inteiro_bin(fp, cab->numeroRegistrosInseridos);
@@ -134,8 +134,14 @@ void escreve_inteiro_bin(FILE* fp, int number) {
 
 void escreve_data_bin(FILE* fp, char data[SIZE_DATA]) {
     if (fp == NULL) return;
-
-    fwrite(data, sizeof(char), SIZE_DATA, fp);
+    if(data[0] == '\0'){
+		char null_chr = '$';
+		fwrite(&data[0], sizeof(char), 1, fp);
+		for(int i=1; i<10; i++)
+			fwrite(&null_chr, sizeof(char), 1, fp);
+	}
+	else
+		fwrite(data, sizeof(char), SIZE_DATA, fp);
 }
 
 //Função utilizada para escrever um caracter no arquivo
@@ -160,8 +166,13 @@ void escreve_char_bin(FILE* fp, char ch) {
 
 void escreve_estado_bin(FILE* fp, char estado[SIZE_ESTADO]) {
     if (fp == NULL) return;
-
-    fwrite(estado, sizeof(char), SIZE_ESTADO, fp);
+    if(estado[0] == '\0'){
+		fwrite(&estado[0], sizeof(char), 1, fp);
+		char null_chr = '$';
+		fwrite(&null_chr, sizeof(char), 1, fp);
+	}
+	else
+		fwrite(estado, sizeof(char), SIZE_ESTADO, fp);
 }
 
 //Função para escrever um registro no arquivo binário.
@@ -180,7 +191,9 @@ void escreve_registro_bin(FILE* fp, Registro* reg, Cabecalho* cab) {
 
     escreve_str_bin(fp, reg->cidadeMae, reg->tamanhoCidadeMae);
     escreve_str_bin(fp, reg->cidadeBebe, reg->tamanhoCidadeBebe);
-    
+
+	escreve_char_bin(fp, '$');	
+
     escreve_inteiro_bin(fp, reg->idNascimento);
     escreve_inteiro_bin(fp, reg->idadeMae);
 
@@ -192,6 +205,7 @@ void escreve_registro_bin(FILE* fp, Registro* reg, Cabecalho* cab) {
     escreve_estado_bin(fp, reg->estadoBebe);
 
     cab->numeroRegistrosInseridos += 1;
+	cab->RRNproxRegistro += 1;
 }
 
 //Função para ler um inteiro de um arquivo.
@@ -295,7 +309,7 @@ int le_registro_bin(FILE* fp, Registro* reg) {
     if (!leu) return 0;
     le_str_bin(fp, reg->cidadeMae, reg->tamanhoCidadeMae);
     le_str_bin(fp, reg->cidadeBebe, reg->tamanhoCidadeBebe);
-    fseek(fp, MAX_CIDADE - (reg->tamanhoCidadeMae) - (reg->tamanhoCidadeBebe) - 8, SEEK_CUR);
+    fseek(fp, 105 - (reg->tamanhoCidadeMae) - (reg->tamanhoCidadeBebe) - 8, SEEK_CUR);
     
     le_inteiro_bin(fp, &(reg->idNascimento));
     le_inteiro_bin(fp, &(reg->idadeMae));
