@@ -8,10 +8,12 @@
 int main(int argc, char const *argv[])
 {
     Cabecalho* cab = NULL;
-    int input_op; //Número da funcionalidade
+    //Registro reg;
+    //char op = 'r';
+    int input_op;
     char path_1[100];
     char path_2[100];
-	
+
     scanf("%d%s", &input_op, path_1);
     switch (input_op)
     {
