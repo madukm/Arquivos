@@ -1,3 +1,8 @@
+/**
+ * Marcus Vinícius Medeiros Pará - 11031663
+ * Maria Eduarda Kawakami Moreira - 11218751
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "manage_bin.h"
@@ -138,6 +143,7 @@ void escreve_inteiro_bin(FILE* fp, int number) {
 //data é o ponteiro da primeiro caracter a ser escrito
 
 //Normalmente, a função escreve uma string de SIZE_DATA caracteres no arquivo.
+//Se data for nulo, então preenche o lixo com $.
 //Em caso de falha na escrita (se fp for NULL), nada é feito.
 
 void escreve_data_bin(FILE* fp, char data[SIZE_DATA]) {
@@ -169,6 +175,7 @@ void escreve_char_bin(FILE* fp, char ch) {
 //uma unidade federativa.
 //fp indica o ponteiro do arquivo em que será feita a escrita.
 //estado é o ponteiro da primeiro caracter a ser escrito.
+//Caso estado seja nulo, então preenche-se o lixo com $.
 //Em caso de falha na escrita (se fp for NULL), nada é feito.
 
 
@@ -187,9 +194,13 @@ void escreve_estado_bin(FILE* fp, char estado[SIZE_ESTADO]) {
 //fp indica o ponteiro do arquivo em que será feita a escrita.
 //reg contem os dados que serão escritos.
 //cab conterá os dados atualizados do cabeçalho ao final da função.
+//cab->numeroRegistrosInseridos é incrementado 1.
+//cab->RRNproxRegistro é incrementado 1.
 
 //Normalmente, a função escreve os dados de reg no arquivo e atualiza cab
 //Em caso de falha na escrita (se fp for NULL), nada é feito.
+//O tamanho do campo para cidadeMae + o tamanho do campo para cidadeBebe = 97.
+//Ao escrevermos cada um, usamos o tamanho = 48, por isso é necessário preencher byte com lixo restante com $.
 
 void escreve_registro_bin(FILE* fp, Registro* reg, Cabecalho* cab) {
     if (fp == NULL) return;
@@ -200,7 +211,7 @@ void escreve_registro_bin(FILE* fp, Registro* reg, Cabecalho* cab) {
     escreve_str_bin(fp, reg->cidadeMae, reg->tamanhoCidadeMae);
     escreve_str_bin(fp, reg->cidadeBebe, reg->tamanhoCidadeBebe);
 
-	escreve_char_bin(fp, '$');	
+	escreve_char_bin(fp, '$');
 
     escreve_inteiro_bin(fp, reg->idNascimento);
     escreve_inteiro_bin(fp, reg->idadeMae);
