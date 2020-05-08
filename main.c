@@ -1,3 +1,9 @@
+/**
+ * @ Author: Marcus Vinícius Medeiros Pará 11031663
+ * @		 Maria Eduarda Kawakami Moreira 11218751
+ * @ Create Time: 2020-05-08 18:31:38
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include "lib/manage_bin/manage_bin.h"
