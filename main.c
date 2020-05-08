@@ -8,8 +8,6 @@
 int main(int argc, char const *argv[])
 {
     Cabecalho* cab = NULL;
-    //Registro reg;
-    //char op = 'r';
     int input_op;
     char path_1[100];
     char path_2[100];
