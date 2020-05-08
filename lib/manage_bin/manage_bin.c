@@ -21,6 +21,10 @@ FILE* abrir_bin(char path[], Cabecalho** cab, char op) {
     {
     case 'w':
         fp = fopen(path, "w+b");
+		if(fp == NULL){
+			printf("Falha no processamento do arquivo.\n");
+			exit(0);
+		}
         escreve_char_bin(fp, '0');
 		fseek(fp, 127, SEEK_CUR);
         *cab = criar_cabecalho();
@@ -28,20 +32,24 @@ FILE* abrir_bin(char path[], Cabecalho** cab, char op) {
     case 'r':
         fp = fopen(path, "r+b");
         if (fp == NULL) {
-            printf(ERROR_MSG);
-            return NULL;
+            printf("Falha no processamento do arquivo.\n");
+            exit(0);
         }
         *cab = criar_cabecalho();
         le_char_bin(fp, &((*cab)->status));
         if ((*cab)->status == '0') {
-            printf(ERROR_MSG);
+            printf("Falha no processamento do arquivo.\n");
             fclose(fp);
-            return NULL;
+            exit(0);
         }
         le_inteiro_bin(fp, &((*cab)->RRNproxRegistro));
         le_inteiro_bin(fp, &((*cab)->numeroRegistrosInseridos));
         le_inteiro_bin(fp, &((*cab)->numeroRegistrosRemovidos));
         le_inteiro_bin(fp, &((*cab)->numeroRegistrosAtualizados));
+		if((*cab)->numeroRegistrosInseridos == 0){
+			printf("Registro inexistente.\n");
+			exit(0);
+		}
         fseek(fp, 128, SEEK_SET);
         break;
     default:
