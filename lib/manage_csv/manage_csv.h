@@ -4,8 +4,6 @@
 #include "../binarioNaTela/binarioNaTela.h"
 
 #define SIZE_DATA 10
-//O tamanho dos campos cidadeMae e cidadeBebe somados é 97.
-//Portanto definimos 48 para cada campo e iremos adicionar um char de lixo para completar os 97 bytes.
 #define MAX_CIDADE 48
 #define SIZE_ESTADO 2
 #define SIZE_REGISTRO 128
@@ -13,14 +11,14 @@
 struct _registro{
 	int tamanhoCidadeMae;
     int tamanhoCidadeBebe;
-    char cidadeMae[MAX_CIDADE + 1];//adiciona-se 1 para o '\0'
-    char cidadeBebe[MAX_CIDADE + 1];//adiciona-se 1 para o '\0'
+    char cidadeMae[MAX_CIDADE + 1];
+    char cidadeBebe[MAX_CIDADE + 1];
     int idNascimento;
 	int idadeMae;
-    char dataNascimento[SIZE_DATA+1];//adiciona-se 1 para o '\0'
+    char dataNascimento[SIZE_DATA+1];
     char sexoBebe;
-    char estadoMae[SIZE_ESTADO+1];//adiciona-se 1 para o '\0'
-	char estadoBebe[SIZE_ESTADO+1];//adiciona-se 1 para o '\0'
+    char estadoMae[SIZE_ESTADO+1];
+	char estadoBebe[SIZE_ESTADO+1];
  };
  
 typedef struct _registro Registro;
@@ -35,11 +33,11 @@ struct _cabecalho{
  
 typedef struct _cabecalho Cabecalho;
 
-Cabecalho *criar_cabecalho();
-FILE *abrir_csv(char *arq_csv);
+FILE *abrir_csv(char path1[]);
 
 char *le_string(FILE *file, int tamanho);
 int le_int(FILE *file);
+char le_char(FILE *file);
 
 char *le_cidade(FILE *file, int *size_cidade);
 char *le_data(FILE *file);
@@ -47,8 +45,9 @@ char le_sexo(FILE *file);
 char *le_estado(FILE *file);
 int le_id(FILE *file, int *retorno_fscanf);
 void le_primeira_linha(FILE *file);
-Registro *le_registro(FILE *file, int *retorno_fscanf);
+int le_registro(FILE *file, Registro *reg);
 
+Cabecalho *criar_cabecalho();
 void print_registro(Registro *r);
 
 #endif

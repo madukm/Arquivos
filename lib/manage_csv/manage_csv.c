@@ -4,15 +4,15 @@
 #include "manage_csv.h"
 
 /**
- * Lida com a leitura do arquivo .csv e com os registros, incluindo casos de erro.
- */ 
+ * manage_csv lida com a leitura do arquivo .csv e com os registros, incluindo os casos de erro.
+ */
 
-//-----Cabecalho-----
+//Criação do cabeçalho
 Cabecalho *criar_cabecalho(){
 	Cabecalho *cab;
 	cab = (Cabecalho *)malloc(sizeof(Cabecalho));
 	if(cab != NULL){
-		cab->status = 0;
+		cab->status = 1;
 		cab->RRNproxRegistro = 0;
 		cab->numeroRegistrosInseridos = 0;
 		cab->numeroRegistrosRemovidos = 0;
@@ -21,11 +21,14 @@ Cabecalho *criar_cabecalho(){
 	return cab;
 }
 
-//Função para abrir o arquivo csv.
-//Caso não seja possível abrir, manda uma mensagem de erro e encerra o programa.
-FILE *abrir_csv(char *arq_csv){
+
+/**
+ * Função para abrir o arquivo .csv
+ * Caso não seja possível abrir, manda uma mensagem de erro e encerra o programa.
+ */
+FILE *abrir_csv(char path1[]){
 	FILE *arq;
-	arq = fopen(arq_csv, "r");
+	arq = fopen(path1, "r");
 	if(arq == NULL){
 		printf("Falha no carregamento do arquivo.\n");
 		exit(0);
@@ -33,24 +36,27 @@ FILE *abrir_csv(char *arq_csv){
 	return arq;
 }
 
-//Função que lê cada string de um registro num arquivo .csv com sepação por vírgula.
-//Recebe o tamanho da string para fazer o malloc.
-//Não confere se file é nulo, pois isso já é verificado quando se abre o arquivo .csv.
+/**
+ * Função que lê cada string de um registro num arquivo .csv com sepação por vírgula.
+ * Recebe o tamanho da string a ser lida.
+ * O fseek é dado a fim de pular a vírgula no arquivo.
+ */ 
 char *le_string(FILE *file, int tamanho){
 	char *str;
 	str = (char *)malloc((tamanho+1) * sizeof(char));
+	str[0] = '\0';
 	fscanf(file, "%[^,^\n]s", str);
 	fseek(file, 1, SEEK_CUR); //pula a vírgula no arquivo
 	return str;
 }
 
 /**
- * Função que lê um inteiro de um registro num arquivo .csv
- * Se o valor for nulo, então armazena-se o valor -1.
+ * Função que lê um inteiro de um registro num arquivo .csv.
+ * Se o valor for nulo, armazena-se o valor -1.
  * O fscanf retorna o número de campos convertidos e atribuídos com êxito.
  * Portanto se o valor de retorno for igual a zero, o valor lido é nulo.
  * O fseek é dado a fim de pular a vírgula no arquivo.
- */ 
+ */
 int le_int(FILE *file){
 	int n;
 	if(fscanf(file, "%d", &n) <= 0)
@@ -59,13 +65,32 @@ int le_int(FILE *file){
 	return n;
 }
 
-/*
+/**
+ * Função que lê um char de um registro num arquivo .csv
+ * Se o char for nulo, a vírgula será lida ao invés do valor.
+ * Nesse caso, atribuímos '0' ao char e não é necessário fazer o fseek.
+ * Se o char não for nulo, damos fseek para pular a vírgula.
+ */
+char le_char(FILE *file){
+	if(file == NULL) return -1;
+	char c;
+	fscanf(file, "%c", &c);
+	if (c != ',') {
+		fseek(file, 1, SEEK_CUR);
+	}
+	else {
+		c = '0';
+	}
+	return c;
+
+}
+
+/**
  * A função lê a string com o nome da cidade.
  * Por esse campo ser de tamanho variável fazemos um realloc para o tamanho exato da string lida.
- * Modificamos o parâmetro size_cidade para conter o tamanho da cidade.
- * Será usado no campo tamanhoCidade no registro.
+ * Modificamos o parâmetro size_cidade para conter o tamanho da cidade, que será usado no campo tamanhoCidade no registro.
  */
-char *le_cidade(FILE *file, int *size_cidade){
+ char *le_cidade(FILE *file, int *size_cidade){
 	char *str; 
 	str = le_string(file, 50);
 	if(str == NULL) return str;
@@ -74,96 +99,70 @@ char *le_cidade(FILE *file, int *size_cidade){
 	return str;
 }
 
-/**
- * A função lê a data de nascimento no formato DD/MM/AAAA.
- */
+//A função lê a data de nascimento no formato DD/MM/AAAA.
 char *le_data(FILE *file){
 	return le_string(file, SIZE_DATA);
 }
 
-/**
- * A função lê o char correspondente ao sexo.
- * Se o char for nulo, então será lido a vírgula ao invés do valor.
- * Nesse caso atribuímos '0' ao char e não é necessário fazer o fseek para pular a vírgula.
- * Se o char não for nulo, fazemos o fseek para pular a vírgula.
- * Não conferimos se o arquivo é nulo pois já o fizemos ao abrir o arquivo.
- */
+//A função lê o char correspondente ao sexo.
 char le_sexo(FILE *file){
-	char c;
-	fscanf(file, "%c", &c);
-	if (c != ',') {
-		fseek(file, 1, SEEK_CUR);//pula a vírgula no arquivo
-	}
-	else {
-		c = '0';
-	}
-	return c;
+	return le_char(file);
 }
 
-/**
- * A função lê o estado no formato EE.
- */
+//A função lê o estado no formato EE.
 char *le_estado(FILE *file){
 	return le_string(file, SIZE_ESTADO);
 }
 
 /**
  * A função lê o ID do registro.
- * Note que o ID nunca é nulo. Portanto o usaremos para determinar o final do arquivo.
+ * Note que o ID nunca é nulo, portanto usaremos para determinar o final do arquivo.
  * int *retorno_fscanf recebe o retorno do fscanf feito para ler o ID.
- * Quando o retorno for <= 0 então chegamos ao final do arquivo.
+ * Quando o retorno for <= 0 chegamos ao final do arquivo.
  * Fazemos o fseek para pular a vírgula no arquivo.
  */
 int le_id(FILE *file, int *retorno_fscanf){
 	int n;
 	*retorno_fscanf = fscanf(file, "%d", &n);
-	fseek(file, 1, SEEK_CUR);
+	fseek(file, 1, SEEK_CUR); //pula a vírgula no arquivo
 	return n;
 }
 
-/**
- * Função que lê e ignora a primeira linha do arquivo .csv que contêm os nomes dos campos dos registros.
- * Damos o fseek para pular o \n no final da linha, já que o fscanf lê até encontrar um espaço ou quebra de linha.
- */
+//Função que lê e ignora a primeira linha do arquivo que contêm os nomes dos campos dos registros.
+//Damos o fseek para pular o \n.
 void le_primeira_linha(FILE *file){
 	fscanf(file, "%*s");
 	fseek(file, 1, SEEK_CUR);
 }
 
 /**
- * Função que lê uma linha do arquivo .csv que corresponde ao registro e adiciona os dados na struct registro_ que é retornada.
- * O parâmetro retorno_fscanf serve para conferirmos se o arquivo chegou ao final, e é feito pela funcão le_id.
- * Se não for possível alocar memória para o registro, retorna-se NULL.
- * char *aux será utilizado como um auxiliar para podermos dar free em toda a memória alocada.
+ * Função que lê uma linha do arquivo .csv que corresponde ao registro e adiciona os dados ao parâmetro Registro.
+ * Utiliza a função le_id para conferir se o arquivo chegou ao final. Nesse caso retorna 0.
+ * Caso o registro seja lido com sucesso retorna-se 1.
  */
-Registro *le_registro(FILE *file, int *retorno_fscanf){
-	Registro *reg;
-    reg	= (Registro *)malloc(sizeof(Registro));
-	if(reg == NULL) return reg;
+int le_registro(FILE *file, Registro *reg){
+	int size_cidadeMae, size_cidadeBebe, retorno_fscanf;
+	char *aux;
 	
-	char *aux = NULL;
-	int *size_cidadeMae = NULL, *size_cidadeBebe = NULL;
-	
-	size_cidadeMae = (int *)malloc(sizeof(int));
-	size_cidadeBebe = (int *)malloc(sizeof(int));
-	
-	aux = le_cidade(file, size_cidadeMae);
+	aux = le_cidade(file, &size_cidadeMae);
 	strcpy(reg->cidadeMae, aux);
 	free(aux);
 
-	aux = le_cidade(file, size_cidadeBebe);
+	aux = le_cidade(file, &size_cidadeBebe);
 	strcpy(reg->cidadeBebe, aux);
 	free(aux);
 
-	reg->tamanhoCidadeMae = *size_cidadeMae;
-	reg->tamanhoCidadeBebe = *size_cidadeBebe;
-	if (size_cidadeMae) free(size_cidadeMae);
-	if (size_cidadeBebe) free(size_cidadeBebe);
+	
+	reg->tamanhoCidadeMae = size_cidadeMae;
+	reg->tamanhoCidadeBebe = size_cidadeBebe;
 
-	reg->idNascimento = le_id(file, retorno_fscanf);
+	reg->idNascimento = le_id(file, &retorno_fscanf);
+	if(retorno_fscanf <= 0)
+		return 0;
 
 	reg->idadeMae = le_int(file);
 	
+
 	aux = le_data(file);
 	strcpy(reg->dataNascimento, aux);
 	free(aux);
@@ -178,10 +177,10 @@ Registro *le_registro(FILE *file, int *retorno_fscanf){
 	strcpy(reg->estadoBebe, aux);
 	free(aux);
 
-	return reg;
+	return 1;
 }
 
-//Função para debug do código que printa os campos de um registro passado como parâmetro.
+//Função para debug que printa os campos de um registro.
 void print_registro(Registro *r){
 	printf("tam = %d cidadeMae = %s\n", r->tamanhoCidadeMae, r->cidadeMae);
 	printf("tam = %d cidadeBebe = %s\n", r->tamanhoCidadeBebe, r->cidadeBebe);
