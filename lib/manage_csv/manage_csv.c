@@ -12,7 +12,7 @@ Cabecalho *criar_cabecalho(){
 	Cabecalho *cab;
 	cab = (Cabecalho *)malloc(sizeof(Cabecalho));
 	if(cab != NULL){
-		cab->status = 1;
+		cab->status = 0;
 		cab->RRNproxRegistro = 0;
 		cab->numeroRegistrosInseridos = 0;
 		cab->numeroRegistrosRemovidos = 0;
