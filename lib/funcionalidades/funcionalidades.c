@@ -6,22 +6,28 @@
 #include "../manage_bin/manage_bin.h"
 #include "../binarioNaTela/binarioNaTela.h"
 
+/**
+ * Funcionalide 1:
+ * Permite a leitura de vários registros obtidos a partir de um arquivo de entrada no formato .csv
+ * E a gravação desses registros em um arquivo de dados de saída.
+ * São passados como parâmetro o arquivo .csv que tem os registros 
+ * e o arquivo .bin no qual serão gravados os registros.
+ * int *retorno_fscanf é usado para determinar se o arquivo chegou no final(explicado na função le_registro em manage_csv).
+ * Após a gravação de todos os registros é chamada a função binarioNaTela.
+ */
 void funcionalidade1(char *path_1, char *path_2, Cabecalho *cab){
 	FILE *csv_fp, *bin_fp;
-	csv_fp = fopen(path_1, "r");
-	if(csv_fp == NULL){
-		printf("Falha no carregamento do arquivo.\n");
-		return;
-	}
+	csv_fp = abrir_csv(path_1);
+	//Abrimos o arquivo binário para escrita.
 	bin_fp = abrir_bin(path_2, &cab, 'w');
 	Registro *reg;
 	int *retorno_fscanf;
 	retorno_fscanf = (int *)malloc(sizeof(int));
+	//A primeira linha do arquivo csv corresponde aos nomes dos campos do registro e é ignorada.
 	le_primeira_linha(csv_fp);
 	while(1){
 		reg = le_registro(csv_fp, retorno_fscanf);
-		if(*retorno_fscanf >= 0){
-//			print_registro(reg);
+		if(*retorno_fscanf <= 0){
 			escreve_registro_bin(bin_fp, reg, cab);
 			free(reg);
 		}
