@@ -198,6 +198,8 @@ void print_registro(Registro *r){
 	printf("estadoBebe = %.2s\n\n", r->estadoBebe);
 }
 
+// Função que verifica se o Registro *reg possui valorDoCampo em nomeDoCampo.
+// Retorna 1 se possuir, 0 caso contrário ou se o nomeDoCampo não existir em reg.
 int check_query(Registro* reg, const char* nomeDoCampo, char* valorDoCampo) {
 	if (strcmp(nomeDoCampo, "cidadeMae") == 0 ) {
 		return strncmp(valorDoCampo, reg->cidadeMae, reg->tamanhoCidadeMae) == 0;
