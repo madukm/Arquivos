@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 #include "funcionalidades.h"
 #include "../manage_csv/manage_csv.h"
@@ -34,37 +35,29 @@ void funcionalidade1(char *path_1, char *path_2, Cabecalho *cab){
 	binarioNaTela(path_2);
 }
 
-void funcionalidade2(char *path_1, Cabecalho *cab){
-	
-	FILE *bin_fp;
-
-	bin_fp = abrir_bin(path_1, &cab, 'r');
-	
-	Registro reg;
-
-	while (le_registro_bin(bin_fp, &reg) ) {
-    	printf("Nasceu em ");
-        if (reg.tamanhoCidadeBebe > 0) {
-       		printf("%s", reg.cidadeBebe);
+void exibe_registro(Registro* reg) {
+	printf("Nasceu em ");
+        if (reg->tamanhoCidadeBebe > 0) {
+       		printf("%s", reg->cidadeBebe);
 		}
 		else printf("-");
 		printf("/");
             
-		if (reg.estadoBebe[0] != '\0') {
-			printf("%.2s,", reg.estadoBebe);
+		if (reg->estadoBebe[0] != '\0') {
+			printf("%.2s,", reg->estadoBebe);
 		}
 		else {
 			printf("-,");
 		}
         printf(" em ");
-        if (reg.dataNascimento[0] != '\0') {
-            printf("%.10s,", reg.dataNascimento);
+        if (reg->dataNascimento[0] != '\0') {
+            printf("%.10s,", reg->dataNascimento);
 		}
        	else {
             printf("-,");
         }
 		printf(" um bebê de sexo ");
-		switch (reg.sexoBebe)
+		switch (reg->sexoBebe)
 		{
 			case '0':
 				printf("IGNORADO.");
@@ -80,7 +73,36 @@ void funcionalidade2(char *path_1, Cabecalho *cab){
                 break;
 		}
 		printf("\n");
+}
 
+void funcionalidade2(char *path_1, Cabecalho *cab){
+	
+	FILE *bin_fp;
+
+	bin_fp = abrir_bin(path_1, &cab, 'r');
+	
+	Registro reg;
+
+	while (le_registro_bin(bin_fp, &reg) ) {
+    	exibe_registro(&reg);
 	}
 	fecha_bin(bin_fp, cab, 'r');
 }       
+
+void funcionalidade3(char *path_1,int m, char** args, Cabecalho *cab) {
+	FILE* bin_fp;
+
+	bin_fp = abrir_bin(path_1, &cab, 'r');
+	Registro reg;
+
+	int exists = 0;
+	
+	while(busca_params_bin(bin_fp, &reg, m, args)) {
+		exibe_registro(&reg);
+		exists = 1;
+	}
+	if (!exists) printf("Registro inexistente.\n");
+
+	fecha_bin(bin_fp, cab, 'r');
+	
+}

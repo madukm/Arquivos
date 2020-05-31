@@ -55,5 +55,6 @@ int le_registro(FILE *file, Registro *reg);
 
 Cabecalho *criar_cabecalho();
 void print_registro(Registro *r);
+int check_query(Registro* reg, const char* nomeDoCampo, char* valorDoCampo);
 
 #endif

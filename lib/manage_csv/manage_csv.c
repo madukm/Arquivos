@@ -198,3 +198,30 @@ void print_registro(Registro *r){
 	printf("estadoBebe = %.2s\n\n", r->estadoBebe);
 }
 
+int check_query(Registro* reg, const char* nomeDoCampo, char* valorDoCampo) {
+	if (strcmp(nomeDoCampo, "cidadeMae") == 0 ) {
+		return strncmp(valorDoCampo, reg->cidadeMae, reg->tamanhoCidadeMae) == 0;
+	}
+	if (strcmp(nomeDoCampo, "cidadeBebe") == 0 ) {
+		return strncmp(valorDoCampo, reg->cidadeBebe, reg->tamanhoCidadeBebe) == 0;
+	}
+	if (strcmp(nomeDoCampo, "idNascimento") == 0 ) {
+		return reg->idNascimento == atoi(valorDoCampo);
+	}
+	if (strcmp(nomeDoCampo, "idadeMae") == 0 ) {
+		return reg->idadeMae == atoi(valorDoCampo);
+	}
+	if (strcmp(nomeDoCampo, "dataNascimento") == 0 ) {
+		return strncmp(reg->dataNascimento, valorDoCampo, SIZE_DATA) == 0;
+	}
+	if (strcmp(nomeDoCampo, "sexoBebe") == 0 ) {
+		return (reg->sexoBebe) == *valorDoCampo;
+	}
+	if (strcmp(nomeDoCampo, "estadoMae") == 0 ) {
+		return strncmp(reg->estadoMae, valorDoCampo, SIZE_ESTADO) == 0;
+	}
+	if (strcmp(nomeDoCampo, "estadoBebe") == 0) {
+		return strncmp(reg->estadoBebe, valorDoCampo, 2) == 0;
+	}
+	return 0;
+}

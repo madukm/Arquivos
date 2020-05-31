@@ -30,7 +30,7 @@ int le_char_bin(FILE* fp, char* ch);
 int le_estado_bin(FILE* fp, char estado[SIZE_ESTADO]);
 
 int le_registro_bin(FILE* fp, Registro* reg);
-
+int busca_params_bin(FILE* fp, Registro* reg, int n_params, char** params);
 
 
 #endif
