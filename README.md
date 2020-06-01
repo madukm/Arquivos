@@ -1,3 +1,2 @@
 # Arquivos
-4 Projetos para Organização de Arquivos
-
+Projetos para a Disciplina de Organização de Arquivos
