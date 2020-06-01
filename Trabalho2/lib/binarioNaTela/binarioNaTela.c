@@ -138,3 +138,15 @@ void scan_quote_string(char *str) {
 	}
 }
 
+void scan_quote_char(char *c){
+	char R;
+	while((R = getchar()) != EOF && isspace(R)); // ignorar espaços, \r, \n...
+	if(R == 'N' || R == 'n') { // campo NULO
+		getchar(); getchar(); getchar(); // ignorar o "ULO" de NULO.
+		*c = '0'; // copia string vazia
+	}else if(R == '\"') {
+		if(scanf("%c", c) != 1) // ler até o fechamento das aspas
+			*c = '0';
+		getchar(); // ignorar aspas fechando
+	}
+}
