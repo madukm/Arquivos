@@ -84,6 +84,63 @@ void funcionalidade2(char *path_1, Cabecalho *cab){
 	}
 	fecha_bin(bin_fp, cab, 'r');
 }
+void exibe_registro(Registro* reg) {
+	printf("Nasceu em ");
+        if (reg->tamanhoCidadeBebe > 0) {
+       		printf("%s", reg->cidadeBebe);
+		}
+		else printf("-");
+		printf("/");
+            
+		if (reg->estadoBebe[0] != '\0') {
+			printf("%.2s,", reg->estadoBebe);
+		}
+		else {
+			printf("-,");
+		}
+        printf(" em ");
+        if (reg->dataNascimento[0] != '\0') {
+            printf("%.10s,", reg->dataNascimento);
+		}
+       	else {
+            printf("-,");
+        }
+		printf(" um bebê de sexo ");
+		switch (reg->sexoBebe)
+		{
+			case '0':
+				printf("IGNORADO.");
+                break;
+            case '1':
+                printf("MASCULINO.");
+                break;
+            case '2':
+                printf("FEMININO.");
+                break;
+            default:
+                printf("-.");
+                break;
+		}
+		printf("\n");
+}
+
+void funcionalidade3(char *path_1,int m, char** args, Cabecalho *cab) {
+	FILE* bin_fp;
+
+	bin_fp = abrir_bin(path_1, &cab, 'r');
+	Registro reg;
+
+	int exists = 0;
+	
+	while(busca_params_bin(bin_fp, &reg, m, args)) {
+		exibe_registro(&reg);
+		exists = 1;
+	}
+	if (!exists) printf("Registro inexistente.\n");
+
+	fecha_bin(bin_fp, cab, 'r');
+	
+}
 
 /**
  * Permite a recuperação dos dados de um registro a partir de seu RRN.

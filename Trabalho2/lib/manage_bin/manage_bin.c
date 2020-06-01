@@ -338,3 +338,28 @@ int le_registro_bin(FILE* fp, Registro* reg) {
     return 1;
     
 }
+
+// Função que realiza busca pelos valores dos campos no arquivo binário em fp, e
+// o coloca em 'reg'.
+// A função retorna 1 se encontrar o registro. Caso contrário, retorna 0.
+// n_params indica quantos pares chave-valor são passados em params.
+// params é um array de strings com pares chave-valor.
+int busca_params_bin(FILE* fp, Registro* reg, int n_params, char** params) {
+    Registro registro_lido;
+
+    while (le_registro_bin(fp, &registro_lido) ) {
+        int is_target = 1;
+    	for (int i = 0; i < n_params; i++) {
+            char* nomeDoCampo = params[2*i];
+            char* valorDoCampo = params[2*i + 1];
+            is_target *= check_query(&registro_lido, nomeDoCampo, valorDoCampo);
+
+        }
+        if (is_target) {
+            *reg = registro_lido;
+            return 1;
+        }
+	}
+    
+    return 0;
+}
