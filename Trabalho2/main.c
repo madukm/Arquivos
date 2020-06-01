@@ -51,6 +51,18 @@ int main(int argc, char const *argv[])
         }
         break;
     }
+	case 6:{
+		int n;
+		scanf("%d", &n);
+		funcionalidade6(path_1, cab, n);
+		break;
+	}
+	case 7:{
+		int n;
+		scanf("%d", &n);
+		funcionalidade7(path_1, cab, n);
+		break;
+	}
     default:
         break;
     }
