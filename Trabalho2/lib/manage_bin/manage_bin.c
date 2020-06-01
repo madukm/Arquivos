@@ -108,21 +108,15 @@ void fecha_bin(FILE* fp, Cabecalho* cab, char op) {
 //str é o ponteiro da primeiro caracter a ser escrito
 //size indica a quantidade de caracteres válidos escritos
 
-//Normalmente a função escreve size caracteres no arquivo e, em
-//seguida escreve (MAX_CIDADE - size) caracteres '$'.
+//Normalmente a função escreve size caracteres no arquivo
 //Em caso de falha na escrita (se fp for NULL), nada é feito.
 
 void escreve_str_bin(FILE* fp, char str[MAX_CIDADE], int size) {
     if (fp == NULL) return;
     
     char* ch = str;
-    char null_ch = '$';
-
-    fwrite(ch, sizeof(char), size, fp);
-    for (int i = size; i < MAX_CIDADE ; i++)
-    {
-        fwrite(&null_ch, sizeof(char), 1,fp);
-    }
+    
+	fwrite(ch, sizeof(char), size, fp);
 }
 
 //Função utilizada para escrever um inteiro no arquivo
@@ -206,8 +200,9 @@ void escreve_registro_bin(FILE* fp, Registro* reg, Cabecalho* cab) {
 
     escreve_str_bin(fp, reg->cidadeMae, reg->tamanhoCidadeMae);
     escreve_str_bin(fp, reg->cidadeBebe, reg->tamanhoCidadeBebe);
-
-	escreve_char_bin(fp, '$');	
+	
+	for(int i=reg->tamanhoCidadeMae+reg->tamanhoCidadeBebe; i<97; i++)
+		escreve_char_bin(fp, '$');
 
     escreve_inteiro_bin(fp, reg->idNascimento);
     escreve_inteiro_bin(fp, reg->idadeMae);
