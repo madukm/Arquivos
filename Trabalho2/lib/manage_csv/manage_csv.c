@@ -202,10 +202,10 @@ void print_registro(Registro *r){
 // Retorna 1 se possuir, 0 caso contrário ou se o nomeDoCampo não existir em reg.
 int check_query(Registro* reg, const char* nomeDoCampo, char* valorDoCampo) {
 	if (strcmp(nomeDoCampo, "cidadeMae") == 0 ) {
-		return strncmp(valorDoCampo, reg->cidadeMae, reg->tamanhoCidadeMae) == 0;
+		return strncmp(valorDoCampo, reg->cidadeMae, strlen(valorDoCampo)) == 0;
 	}
 	if (strcmp(nomeDoCampo, "cidadeBebe") == 0 ) {
-		return strncmp(valorDoCampo, reg->cidadeBebe, reg->tamanhoCidadeBebe) == 0;
+		return strncmp(valorDoCampo, reg->cidadeBebe, strlen(valorDoCampo)) == 0;
 	}
 	if (strcmp(nomeDoCampo, "idNascimento") == 0 ) {
 		return reg->idNascimento == atoi(valorDoCampo);
