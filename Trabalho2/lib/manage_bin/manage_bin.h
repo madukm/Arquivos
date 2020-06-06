@@ -32,5 +32,6 @@ int le_estado_bin(FILE* fp, char estado[SIZE_ESTADO]);
 int le_registro_bin(FILE* fp, Registro* reg);
 int busca_registro_RRN(FILE* fp, Registro* reg, int RRN);
 int busca_params_bin(FILE* fp, Registro* reg, int n_params, char** params);
+int busca_params_bin_RRN(FILE* fp, Registro* reg, int n_params, char** params);
 
 #endif

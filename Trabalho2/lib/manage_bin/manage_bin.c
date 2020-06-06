@@ -54,7 +54,7 @@ FILE* abrir_bin(char path[], Cabecalho** cab, char op) {
         le_inteiro_bin(fp, &((*cab)->numeroRegistrosRemovidos));
         le_inteiro_bin(fp, &((*cab)->numeroRegistrosAtualizados));
 		if((*cab)->numeroRegistrosInseridos == 0){
-			printf("Registro inexistente.\n");
+			printf("Registro Inexistente.\n");
 			exit(0);
 		}
         fseek(fp, 128, SEEK_SET);
@@ -306,6 +306,7 @@ int le_estado_bin(FILE* fp, char estado[SIZE_ESTADO]) {
 
 //Normalmente, a função lê um registro do arquivo e retorna o 
 //número de registros lidos com sucesso.
+//Se o arquivo for removido, ele retorna -1.
 
 //Se fp for NULL, nada é feito.
 
@@ -314,9 +315,21 @@ int le_registro_bin(FILE* fp, Registro* reg) {
 
     int leu = 0;
     leu = le_inteiro_bin(fp, &(reg->tamanhoCidadeMae));
-    if (!leu || reg->tamanhoCidadeMae == -1) return 0;
+    if(reg->tamanhoCidadeMae == -1){
+		fseek(fp, 124, SEEK_CUR); //ir para o proximo registro
+		return -1;
+	}
+	if (!leu){
+		fseek(fp, 124, SEEK_CUR);
+		return 0;
+	}
+
     leu = le_inteiro_bin(fp, &(reg->tamanhoCidadeBebe));
-    if (!leu) return 0;
+    if (!leu) {
+		fseek(fp, 120, SEEK_CUR);
+		return 0;
+	}
+
     le_str_bin(fp, reg->cidadeMae, reg->tamanhoCidadeMae);
     le_str_bin(fp, reg->cidadeBebe, reg->tamanhoCidadeBebe);
     fseek(fp, 105 - (reg->tamanhoCidadeMae) - (reg->tamanhoCidadeBebe) - 8, SEEK_CUR);
@@ -337,13 +350,15 @@ int le_registro_bin(FILE* fp, Registro* reg) {
 // Função que realiza busca pelos valores dos campos no arquivo binário em fp, e
 // o coloca em 'reg'.
 // A função retorna 1 se encontrar o registro. Caso contrário, retorna 0.
+// Se encontrar um registro logicamente removido, ele apenas o ignora e continua a busca.
 // n_params indica quantos pares chave-valor são passados em params.
 // params é um array de strings com pares chave-valor.
 int busca_params_bin(FILE* fp, Registro* reg, int n_params, char** params) {
     Registro registro_lido;
-
-    while (le_registro_bin(fp, &registro_lido) ) {
-        int is_target = 1;
+	int removido;
+    while ((removido = le_registro_bin(fp, &registro_lido)) != 0) {
+        if(removido == -1) continue;
+		int is_target = 1;
     	for (int i = 0; i < n_params; i++) {
             char* nomeDoCampo = params[2*i];
             char* valorDoCampo = params[2*i + 1];
@@ -362,4 +377,26 @@ int busca_params_bin(FILE* fp, Registro* reg, int n_params, char** params) {
 int busca_registro_RRN(FILE* fp, Registro* reg, int RRN) {
     fseek(fp, RRN*SIZE_REGISTRO, SEEK_CUR);
     return le_registro_bin(fp, reg);
+}
+
+/**
+ * Parecido com o busca_params_bin, porém retorna o RRN do registro.
+ */
+int busca_params_bin_RRN(FILE *fp, Registro *reg, int n_params, char **params){
+	 Registro registro_lido;
+
+    while (le_registro_bin(fp, &registro_lido)) {
+       	int RRN = ftell(fp)-128;
+	   	int is_target = 1;
+    	for (int i = 0; i < n_params; i++) {
+            char* nomeDoCampo = params[2*i];
+            char* valorDoCampo = params[2*i + 1];
+			is_target *= check_query(&registro_lido, nomeDoCampo, valorDoCampo);
+        }
+        if (is_target) {
+            *reg = registro_lido;
+            return RRN/128-1;
+        }
+	}
+    return -1;
 }
