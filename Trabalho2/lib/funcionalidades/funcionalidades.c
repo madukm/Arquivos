@@ -88,8 +88,6 @@ void funcionalidade2(char *path_1, Cabecalho *cab){
 	fecha_bin(bin_fp, cab, 'r');
 }
 
-
-
 void funcionalidade3(char *path_1,int m, char** args, Cabecalho *cab) {
 	FILE* bin_fp;
 
@@ -97,12 +95,14 @@ void funcionalidade3(char *path_1,int m, char** args, Cabecalho *cab) {
 	Registro reg;
 
 	int exists = 0;
-	
-	while(busca_params_bin(bin_fp, &reg, m, args)) {
+	int removido;
+
+	while((removido = busca_params_bin(bin_fp, &reg, m, args))) {
 		exibe_registro(&reg);
-		exists = 1;
+		if(removido != -1)
+			exists = 1;
 	}
-	if (!exists) printf("Registro inexistente.\n");
+	if (!exists) printf("Registro Inexistente.\n");
 
 	fecha_bin(bin_fp, cab, 'r');
 	
@@ -113,24 +113,70 @@ void funcionalidade4(char* path_1, int RRN, Cabecalho* cab) {
 
 	bin_fp = abrir_bin(path_1, &cab, 'r');
 	Registro reg;
-
-	if (busca_registro_RRN(bin_fp, &reg, RRN)) exibe_registro(&reg);
-	else printf("Registro inexistente.\n");
+	
+	if (busca_registro_RRN(bin_fp, &reg, RRN) == 1) exibe_registro(&reg);
+	else printf("Registro Inexistente.\n");
 
 }
 
 /**
- * Permite a recuperação dos dados de um registro a partir de seu RRN.
- * Os dados serão mostrados no mesmo formato da Funcionalidade.
+ * Permite a remoção lógica de registros, baseado na abordagem estática.
+ * Armazena-se -1 no primeiro campo se o registro for removido.
+ * São removidos n registros.
+ * Se a solicitação de usuário não retornar nenhum registro, o programa continua.
+ * Antes de terminar a execução, é chamado binarioNaTela.
  */
+void funcionalidade5(char *path_1, Cabecalho *cab, int n){
+	FILE* bin_fp;
+	bin_fp = abrir_bin(path_1, &cab, 'r');
+	
+	fseek(bin_fp, 0, SEEK_SET);
+	escreve_char_bin(bin_fp, '0'); // Marcando o arquivo como inconsistente.
+
+	int i, j, m,  null = -1;
+    char** args;
+	
+	Registro reg;
+	
+	for(i=0; i<n; i++)
+	{
+        scanf("%d", &m);
+    	// Lendo os nomes e valores dos campos.
+		args = (char**) malloc(2*m*sizeof(char*));
+        for (j = 0; j < m; j++) {
+            args[2*j] = (char*) malloc(30*sizeof(char));
+            args[2*j + 1] = (char*) malloc(30*sizeof(char));
+            scanf("%s", args[2*j]);
+            scan_quote_string(args[2*j + 1]);
+		}
+		// Realizar a busca do começo.
+		fseek(bin_fp, 128, SEEK_SET);
+		while(busca_params_bin(bin_fp, &reg, m, args)){
+			int prox = ftell(bin_fp); // Guarda o começo do próximo registro
+			fseek(bin_fp, -128, SEEK_CUR); // Voltando para o começo do registro.
+			escreve_inteiro_bin(bin_fp, null); //Remove logicamente para todos o registro encontrado.
+			cab->numeroRegistrosRemovidos++;
+			cab->numeroRegistrosInseridos--;
+			fseek(bin_fp, prox, SEEK_SET); // Volta pro começo do próximo registro.
+		}
+		// Frees
+		for (j = 0; j < m; j++)	{
+    	 	free(args[2*j]);
+ 		 	free(args[2*j + 1]);
+			args[2*j] = NULL;
+			args[2*j+1] = NULL;
+		}
+		free(args);
+	}
+
+	fecha_bin(bin_fp, cab, 'w');
+	binarioNaTela(path_1);
+}
 
 /**
- *
- */
-
-
-/**
- * Insere n registros no final do arquivo de dados.
+ * Permite a inserção de registros, baseado na abordagem estática.
+ * São inseridos n registros no final do arquivo.
+ * Ao final de de todas as modificações, é chamado binarioNaTela.
  */
 void funcionalidade6(char *path_1, Cabecalho *cab, int n)
 {	
@@ -146,7 +192,7 @@ void funcionalidade6(char *path_1, Cabecalho *cab, int n)
 		scanf("%d", &reg.idNascimento);
 		if(scanf("%d", &reg.idadeMae) == 0)
 		{
-			scanf("%*s"); //O NULO ainda não foi lido, então ignoraremos ele.
+			scanf("%*s"); // O NULO ainda não foi lido, então ignoraremos ele.
 			reg.idadeMae = -1;
 		}
 		scan_quote_string(reg.dataNascimento);
@@ -155,7 +201,7 @@ void funcionalidade6(char *path_1, Cabecalho *cab, int n)
 		scan_quote_string(reg.estadoBebe);
 		reg.tamanhoCidadeMae = strlen(reg.cidadeMae);
 		reg.tamanhoCidadeBebe = strlen(reg.cidadeBebe);
-		fseek(bin_fp, 0, SEEK_END);
+		fseek(bin_fp, 0, SEEK_END); // Sempre inserre no final do arquivo.
 		escreve_registro_bin(bin_fp, &reg, cab);
 	}
 
@@ -168,7 +214,7 @@ void funcionalidade7(char *path_1, Cabecalho *cab, int n)
 	FILE *bin_fp;
 	bin_fp = abrir_bin(path_1, &cab, 'r'); 
 	
-	int i, j, m, RRN, numero, checkError;
+	int i, j, m, RRN, numero, checkError = 0;
 	char sexo, nomeCampo[40], valorCampo[50];
 	
 	Registro r;
@@ -181,16 +227,16 @@ void funcionalidade7(char *path_1, Cabecalho *cab, int n)
 		for(j=0; j<m; j++)
 		{	
 			scanf("%s", nomeCampo);
-			fseek(bin_fp, 128*(RRN+1), SEEK_SET);
+			fseek(bin_fp, 128*(RRN+1), SEEK_SET); // Vai pro byte offset do registro.
 			
-			if(SEEK_SET == SEEK_END) checkError = -1; // Se o RRN não for válido.
-			else le_inteiro_bin(bin_fp, &checkError); // Se o registro estiver removido.
+			if(SEEK_SET == SEEK_END) checkError = 1; // Se o RRN não for válido.
+			else{
+				if(le_registro_bin(bin_fp, &r) != 1) // Se o registro estiver removido.
+					checkError = 1;
+			}
 			
-			if(checkError == -1) break; 
+			if(checkError == 1) break; 
 			
-			fseek(bin_fp, -4, SEEK_CUR); 	
-			
-			le_registro_bin(bin_fp, &r);
 			fseek(bin_fp, -128, SEEK_CUR);
 			
 			if(strcmp(nomeCampo, "cidadeMae") == 0)
@@ -248,14 +294,18 @@ void funcionalidade7(char *path_1, Cabecalho *cab, int n)
 				escreve_estado_bin(bin_fp, valorCampo);
 			}
 		}
-		if(checkError == -1)
+		// Se o registro não puder ser lido ou estiver removido, então ignoramos todos os campos em relação a ele.
+		// E passamos para o próximo.
+		if(checkError == 1)
 		{
 			for(j=0; j<m; j++)
 				scanf("%*s");
 		}
+		// Senão, o registro foi atualizado com sucesso.
 		else cab->numeroRegistrosAtualizados++;
 	}
 
 	fecha_bin(bin_fp, cab, 'w');
 	binarioNaTela(path_1);
+
 }
