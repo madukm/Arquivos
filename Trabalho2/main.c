@@ -57,6 +57,12 @@ int main(int argc, char const *argv[])
         funcionalidade4(path_1, RRN, cab);
         break;
     }
+	case 5:{
+		int n; 
+        scanf("%d", &n);
+		funcionalidade5(path_1, cab, n);
+		break;
+	}
 	case 6:{
 		int n;
 		scanf("%d", &n);
