@@ -379,24 +379,4 @@ int busca_registro_RRN(FILE* fp, Registro* reg, int RRN) {
     return le_registro_bin(fp, reg);
 }
 
-/**
- * Parecido com o busca_params_bin, porém retorna o RRN do registro.
- */
-int busca_params_bin_RRN(FILE *fp, Registro *reg, int n_params, char **params){
-	 Registro registro_lido;
 
-    while (le_registro_bin(fp, &registro_lido)) {
-       	int RRN = ftell(fp)-128;
-	   	int is_target = 1;
-    	for (int i = 0; i < n_params; i++) {
-            char* nomeDoCampo = params[2*i];
-            char* valorDoCampo = params[2*i + 1];
-			is_target *= check_query(&registro_lido, nomeDoCampo, valorDoCampo);
-        }
-        if (is_target) {
-            *reg = registro_lido;
-            return RRN/128-1;
-        }
-	}
-    return -1;
-}
