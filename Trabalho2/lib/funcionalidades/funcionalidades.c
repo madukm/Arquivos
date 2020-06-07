@@ -182,6 +182,9 @@ void funcionalidade6(char *path_1, Cabecalho *cab, int n)
 {	
 	FILE *bin_fp;
 	bin_fp = abrir_bin(path_1, &cab, 'r'); 
+	fseek(bin_fp, 0, SEEK_SET);
+	escreve_char_bin(bin_fp, '0'); // Marcando o arquivo como inconsistente.
+
 	int i;
 	Registro reg;
 
@@ -213,7 +216,9 @@ void funcionalidade7(char *path_1, Cabecalho *cab, int n)
 {
 	FILE *bin_fp;
 	bin_fp = abrir_bin(path_1, &cab, 'r'); 
-	
+	fseek(bin_fp, 0, SEEK_SET);
+	escreve_char_bin(bin_fp, '0'); // Marcando o arquivo como inconsistente.
+
 	int i, j, m, RRN, numero, checkError = 0;
 	char sexo, nomeCampo[40], valorCampo[50];
 	
