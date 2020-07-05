@@ -46,7 +46,8 @@ FILE* abrir_bin(char path[], Cabecalho** cab, char op) {
         le_char_bin(fp, &((*cab)->status));
         if ((*cab)->status == '0') {
             printf("Falha no processamento do arquivo.\n");
-            fclose(fp);
+            free(*cab);
+			fclose(fp);
             exit(0);
         }
         le_inteiro_bin(fp, &((*cab)->RRNproxRegistro));
@@ -54,8 +55,8 @@ FILE* abrir_bin(char path[], Cabecalho** cab, char op) {
         le_inteiro_bin(fp, &((*cab)->numeroRegistrosRemovidos));
         le_inteiro_bin(fp, &((*cab)->numeroRegistrosAtualizados));
 		if((*cab)->numeroRegistrosInseridos == 0){
-			printf("Registro Inexistente.\n");
-			exit(0);
+//			printf("Registro Inexistente.\n");
+//			exit(0);
 		}
         fseek(fp, 128, SEEK_SET);
         break;
@@ -379,4 +380,71 @@ int busca_registro_RRN(FILE* fp, Registro* reg, int RRN) {
     return le_registro_bin(fp, reg);
 }
 
+// ARQUIVO BINARIO ARVORE B
+// Le pagina do arquivo binario e guarda em BT_page.
+void le_pagina(FILE *fp, BT_page *page){
+	if(fp == NULL) return;
+	
+	int i;
 
+    le_inteiro_bin(fp, &(page->nivel));
+	
+	le_inteiro_bin(fp, &(page->n));
+	
+	for(i=0; i<BT_ORDER-1; i++){
+		le_inteiro_bin(fp, &(page->keys[i].C));
+		le_inteiro_bin(fp, &(page->keys[i].Pr));
+	}
+
+	for(i=0; i<BT_ORDER; i++)
+		le_inteiro_bin(fp, &(page->P[i]));
+	
+	return;	
+}
+
+//Busca a pagina a partir do RRN
+void busca_pagina_RRN(FILE *bt, BT_page *page, int RRN){
+	fseek(bt, RRN*SIZE_PAGE + SIZE_HEADER, SEEK_SET);
+	le_pagina(bt, page);
+	return;
+}
+
+void le_header_BT(FILE *bt, BT_header *header){
+	if(bt == NULL) return;
+	
+	fseek(bt, 0, SEEK_SET);
+
+	le_inteiro_bin(bt, &(header->status));
+	le_inteiro_bin(bt, &(header->noRaiz));
+	le_inteiro_bin(bt, &(header->nroNiveis));
+	le_inteiro_bin(bt, &(header->proxRRN));
+	le_inteiro_bin(bt, &(header->nroChaves));
+	
+	return;
+}
+
+void escreve_header_BT(FILE *bt, BT_header *header){
+	if(bt == NULL) return;
+	fseek(bt, 0, SEEK_SET);
+	escreve_inteiro_bin(bt, header->status);
+	escreve_inteiro_bin(bt, header->noRaiz);
+	escreve_inteiro_bin(bt, header->nroNiveis);
+	escreve_inteiro_bin(bt, header->proxRRN);
+	escreve_inteiro_bin(bt, header->nroChaves);
+	return;
+}
+
+void escreve_pagina_BT(FILE *fp, BT_page *page){
+	if(fp == NULL) return;
+
+	escreve_inteiro_bin(fp, page->nivel);
+	escreve_inteiro_bin(fp, page->n);
+	
+	for(int i=0; i<BT_ORDER-1; i++){
+		escreve_inteiro_bin(fp, page->keys[i].C);
+		escreve_inteiro_bin(fp, page->keys[i].Pr);
+	}
+	for(int i=0; i<BT_ORDER; i++)
+		escreve_inteiro_bin(fp, page->P[i]);
+	
+}
