@@ -11,6 +11,7 @@
 #include "lib/manage_csv/manage_csv.h"
 #include "lib/binarioNaTela/binarioNaTela.h"
 #include "lib/funcionalidades/funcionalidades.h"
+#include "lib/arvoreB/arvoreB.h"
 
 int main(int argc, char const *argv[])
 {
@@ -75,7 +76,11 @@ int main(int argc, char const *argv[])
 		funcionalidade7(path_1, cab, n);
 		break;
 	}
-    default:
+	case 8:
+		scanf("%s", path_2);
+		funcionalidade8(path_1, path_2, cab);
+		break;	
+	default:
         break;
     }
     
