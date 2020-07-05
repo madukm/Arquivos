@@ -8,10 +8,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+
 #include "funcionalidades.h"
+
 #include "../manage_csv/manage_csv.h"
 #include "../manage_bin/manage_bin.h"
 #include "../binarioNaTela/binarioNaTela.h"
+#include "../arvoreB/arvoreB.h"
 
 void exibe_registro(Registro* reg) {
 	printf("Nasceu em ");
@@ -239,7 +242,6 @@ void funcionalidade7(char *path_1, Cabecalho *cab, int n)
 				if(le_registro_bin(bin_fp, &r) != 1) // Se o registro estiver removido.
 					checkError = 1;
 			}
-			
 			if(checkError == 1) break; 
 			
 			fseek(bin_fp, -128, SEEK_CUR);
@@ -313,4 +315,21 @@ void funcionalidade7(char *path_1, Cabecalho *cab, int n)
 	fecha_bin(bin_fp, cab, 'w');
 	binarioNaTela(path_1);
 
+}
+
+//Cria um arquivo de índice árvore B para um arquivo de dados de entrada.
+//O campo a ser indexado é idNascimento.
+//Registros logicamente removidos não são considerados no arquivo de índice.
+//Ao final, é chamada a função binarioNaTela.
+void funcionalidade8(char *path_1, char *path_2, Cabecalho *cab){
+	FILE *fp;	
+	//Abre pf apenas para leitura.
+	fp = abrir_bin(path_1, &cab, 'r'); 
+	
+	//Chama a rotina da criação da árvore B.
+	driver_BT(path_2, fp);
+
+	fecha_bin(fp, cab, 'r');
+
+	binarioNaTela(path_2);
 }
