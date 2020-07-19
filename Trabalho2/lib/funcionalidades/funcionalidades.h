@@ -18,6 +18,7 @@ void funcionalidade6(char *path_1, Cabecalho *cab, int n);
 void funcionalidade7(char *path_1, Cabecalho *cab, int n);
 void funcionalidade8(char *path_1, char *path_2, Cabecalho *cab);
 void funcionalidade9(char *path_1, char *path_2, int valor, Cabecalho *cab);
+void funcionalidade10(char *path_1, char *path_2, Cabecalho *cab, int n);
 	
 #endif
 

@@ -267,7 +267,7 @@ void driver_BT(char *b_tree, FILE *fp){
 
 	//Enquanto existir uma chave
 	while(1){
-		RRN_fp = (ftell(fp)-128)/128; //RRN do registro a ser lido.
+		RRN_fp = (ftell(fp)-SIZE_HEADER)/SIZE_REGISTRO; //RRN do registro a ser lido.
 		if(le_registro_bin(fp, &reg) < 1) break; //Acabaram os registros.
 		
 		chave.C = reg.idNascimento;

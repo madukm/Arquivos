@@ -209,6 +209,14 @@ void funcionalidade6(char *path_1, Cabecalho *cab, int n)
 		reg.tamanhoCidadeBebe = strlen(reg.cidadeBebe);
 		fseek(bin_fp, 0, SEEK_END); // Sempre inserre no final do arquivo.
 		escreve_registro_bin(bin_fp, &reg, cab);
+		
+		// BT_keys chave;
+		// BT_keys chave_promo;
+		// int filho_promo;
+		// int RRN = i + 1;
+		// chave.C = reg.idNascimento;
+		// chave.Pr = RRN;
+		// insere_BT(bin_fp, RRN, chave, &chave_promo, filho_promo);
 	}
 
 	fecha_bin(bin_fp, cab, 'w');
@@ -346,12 +354,12 @@ void funcionalidade9(char *path_1, char *path_2, int valor, Cabecalho *cab) {
 
 	fp = abrir_bin(path_1, &cab, 'r');
 	if (!fp) {
-		printf("Falha no processamento do arquivo\n");
+		printf("Falha no processamento do arquivo.\n");
 		return;
 	}
 	bt_fp = fopen(path_2,"rb");
 	if (!bt_fp) {
-		printf("Falha no processamento do arquivo\n");
+		printf("Falha no processamento do arquivo.\n");
 		return;
 	}
 
@@ -359,14 +367,93 @@ void funcionalidade9(char *path_1, char *path_2, int valor, Cabecalho *cab) {
 
 	le_header_BT(bt_fp, &header);
 	busca = busca_BT(bt_fp, header.noRaiz, valor, &found_RRN, &pos);
-	printf("%c\n%d\n", header.status, header.noRaiz);
 	if (busca == -1) {
 		printf("Registro inexistente.\n");
 		return;
 	}
-	busca_pagina_RRN(fp, &page, found_RRN);
-	busca_registro_RRN(fp, &reg, page.keys[pos].Pr);
+	busca_pagina_RRN(bt_fp, &page, found_RRN);
+	busca_registro_RRN(fp, &reg, busca);
 	exibe_registro(&reg);
+	printf("Quantidade de paginas da arvore-B acessadas: %d\n", page.n + 1);
 	fecha_bin(fp, cab, 'r');
 	fclose(bt_fp);
+}
+
+void funcionalidade10(char *path_1, char *path_2, Cabecalho *cab, int n)
+{	
+	FILE *bin_fp;
+	FILE *bt_fp;
+	bin_fp = abrir_bin(path_1, &cab, 'w'); 
+	if (!bin_fp) {
+		printf("Falha no processamento do arquivo.\n");
+		return;
+	}
+	fseek(bin_fp, 0, SEEK_SET);
+	escreve_char_bin(bin_fp, '0'); // Marcando o arquivo como inconsistente.
+	int i;
+	Registro reg;
+
+	bt_fp = fopen(path_2,"rb+");
+	if (!bt_fp) {
+		printf("Falha no processamento do arquivo.\n");
+		fecha_bin(bin_fp, cab, 'r');
+		return;
+	}
+
+
+	BT_header bt_header;
+	le_header_BT(bt_fp, &bt_header);
+	escreve_char_bin(bt_fp, '0');
+
+	for(i=0; i<n; i++)
+	{
+		scan_quote_string(reg.cidadeMae);
+		scan_quote_string(reg.cidadeBebe);
+		scanf("%d", &reg.idNascimento);
+		if(scanf("%d", &reg.idadeMae) == 0)
+		{
+			scanf("%*s"); // O NULO ainda não foi lido, então ignoraremos ele.
+			reg.idadeMae = -1;
+		}
+		scan_quote_string(reg.dataNascimento);
+		scan_quote_char(&reg.sexoBebe);	
+		scan_quote_string(reg.estadoMae);
+		scan_quote_string(reg.estadoBebe);
+		reg.tamanhoCidadeMae = strlen(reg.cidadeMae);
+		reg.tamanhoCidadeBebe = strlen(reg.cidadeBebe);
+		fseek(bin_fp, 0, SEEK_END); // Sempre inserre no final do arquivo.
+		escreve_registro_bin(bin_fp, &reg, cab);
+		
+		int RRN = (ftell(bin_fp)-SIZE_HEADER)/SIZE_REGISTRO;
+		int filho_promo;
+		BT_keys chave;
+		BT_keys chave_promo;
+		
+		chave.C = reg.idNascimento;
+		chave.Pr = RRN;
+		
+		if(insere_BT(bt_fp, bt_header.noRaiz, chave, &chave_promo, &filho_promo) == PROMOTION){
+			BT_page new_root;
+			inicializa_pagina(&new_root);
+			//Chaves
+			new_root.keys[0].C = chave_promo.C;
+			new_root.keys[0].Pr = chave_promo.Pr;
+			//Filhos
+			new_root.P[0] = bt_header.noRaiz;
+			new_root.P[1] = filho_promo;
+			
+			bt_header.noRaiz = bt_header.proxRRN;
+			bt_header.proxRRN += 1;
+			bt_header.nroNiveis += 1;
+		
+		
+		}
+
+	}
+	
+	fecha_bin(bin_fp, cab, 'w');
+	fseek(bt_fp, 0, SEEK_SET);
+	escreve_header_BT(bt_fp, &bt_header);
+	fclose(bt_fp);
+	binarioNaTela(path_2);
 }
