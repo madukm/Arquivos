@@ -11,7 +11,7 @@
 BT_header *criar_header_BT(){
 	BT_header *cab = (BT_header *)malloc(sizeof(BT_header));
 	if(cab != NULL){
-		cab->status = 1;
+		cab->status = '1';
 		cab->noRaiz = -1;
 		cab->nroNiveis = 0;
 		cab->proxRRN = 0;
@@ -41,7 +41,6 @@ void inicializa_pagina(BT_page *page){
 // Found RRN é o RRN da página onde a chave se encontra (no arquivo de indices da arvore B)
 // Found POS é a posição dentro da página(0 a 4).
 int busca_BT(FILE *bt, int RRN, int chave, int *found_RRN, int *found_pos){
-	
 	int pos;
 	BT_page page;
 	inicializa_pagina(&page);
@@ -237,13 +236,15 @@ void driver_BT(char *b_tree, FILE *fp){
 		//A primeira chave vira o noRaiz.
 		bt = fopen(b_tree, "wb+");
 		header = criar_header_BT();
-
 		fseek(fp, 128, SEEK_SET);
    		if(le_registro_bin(fp, &reg) < 1){ //Se não houver registros.
-			printf(ERROR_MSG);
+		 	// printf(ERROR_MSG);
+			escreve_header_BT(bt, header);	
+			free(header);
+			fclose(bt);
 			return;
 		}
-
+	
 		BT_page root;
 		inicializa_pagina(&root);
 		
@@ -263,21 +264,18 @@ void driver_BT(char *b_tree, FILE *fp){
 	int RRN_fp;
 	int filho_promo;
    	BT_keys	chave_promo;
-	
+
 	//Enquanto existir uma chave
 	while(1){
-
-		RRN_fp = (ftell(fp)-SIZE_HEADER)/SIZE_PAGE; //RRN do registro a ser lido.
+		RRN_fp = (ftell(fp)-128)/128; //RRN do registro a ser lido.
 		if(le_registro_bin(fp, &reg) < 1) break; //Acabaram os registros.
 		
 		chave.C = reg.idNascimento;
 		chave.Pr = RRN_fp;
-
+		
 		if(insere_BT(bt, header->noRaiz, chave, &chave_promo, &filho_promo) == PROMOTION){
-			
 			BT_page new_root;
 			inicializa_pagina(&new_root);
-			
 			//Chaves
 			new_root.keys[0].C = chave_promo.C;
 			new_root.keys[0].Pr = chave_promo.Pr;
@@ -298,3 +296,4 @@ void driver_BT(char *b_tree, FILE *fp){
 	fclose(bt);
 
 }
+

@@ -80,6 +80,16 @@ int main(int argc, char const *argv[])
 		scanf("%s", path_2);
 		funcionalidade8(path_1, path_2, cab);
 		break;	
+    case 9:{
+        char string[13];
+        int valor;
+        scanf("%s", path_2);
+        scanf("%s", string);
+        scanf("%d", &valor);
+        printf("%s\n%d\n", string, valor);
+        funcionalidade9(path_1, path_2, valor, cab);
+        break;
+    }
 	default:
         break;
     }

@@ -414,7 +414,8 @@ void le_header_BT(FILE *bt, BT_header *header){
 	
 	fseek(bt, 0, SEEK_SET);
 
-	le_inteiro_bin(bt, &(header->status));
+    le_char_bin(bt, &(header->status));
+	// le_inteiro_bin(bt, &(header->status));
 	le_inteiro_bin(bt, &(header->noRaiz));
 	le_inteiro_bin(bt, &(header->nroNiveis));
 	le_inteiro_bin(bt, &(header->proxRRN));
@@ -426,11 +427,14 @@ void le_header_BT(FILE *bt, BT_header *header){
 void escreve_header_BT(FILE *bt, BT_header *header){
 	if(bt == NULL) return;
 	fseek(bt, 0, SEEK_SET);
-	escreve_inteiro_bin(bt, header->status);
+	escreve_char_bin(bt, header->status);
 	escreve_inteiro_bin(bt, header->noRaiz);
 	escreve_inteiro_bin(bt, header->nroNiveis);
 	escreve_inteiro_bin(bt, header->proxRRN);
 	escreve_inteiro_bin(bt, header->nroChaves);
+    for (int i = 0; i < 55; i++) {
+        escreve_char_bin(bt, '$');
+    }
 	return;
 }
 

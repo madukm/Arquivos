@@ -333,3 +333,40 @@ void funcionalidade8(char *path_1, char *path_2, Cabecalho *cab){
 
 	binarioNaTela(path_2);
 }
+
+void funcionalidade9(char *path_1, char *path_2, int valor, Cabecalho *cab) {
+	FILE *fp;
+	FILE *bt_fp;
+	BT_header header;
+	BT_page page;
+	Registro reg;
+	int found_RRN;
+	int pos;
+	int busca;
+
+	fp = abrir_bin(path_1, &cab, 'r');
+	if (!fp) {
+		printf("Falha no processamento do arquivo\n");
+		return;
+	}
+	bt_fp = fopen(path_2,"rb");
+	if (!bt_fp) {
+		printf("Falha no processamento do arquivo\n");
+		return;
+	}
+
+	inicializa_pagina(&page);
+
+	le_header_BT(bt_fp, &header);
+	busca = busca_BT(bt_fp, header.noRaiz, valor, &found_RRN, &pos);
+	printf("%c\n%d\n", header.status, header.noRaiz);
+	if (busca == -1) {
+		printf("Registro inexistente.\n");
+		return;
+	}
+	busca_pagina_RRN(fp, &page, found_RRN);
+	busca_registro_RRN(fp, &reg, page.keys[pos].Pr);
+	exibe_registro(&reg);
+	fecha_bin(fp, cab, 'r');
+	fclose(bt_fp);
+}

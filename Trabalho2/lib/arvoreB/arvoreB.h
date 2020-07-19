@@ -11,7 +11,7 @@
 #define ERROR -1
 
 struct _BT_header{
-	int status;
+	char status;
 	int noRaiz;
 	int nroNiveis;
 	int proxRRN;
