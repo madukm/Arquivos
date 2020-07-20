@@ -348,8 +348,8 @@ void funcionalidade9(char *path_1, char *path_2, int valor, Cabecalho *cab) {
 	BT_header header;
 	BT_page page;
 	Registro reg;
-	int found_RRN;
-	int pos;
+	int found_RRN = -1;
+	int pos = -1;
 	int busca;
 
 	fp = abrir_bin(path_1, &cab, 'r');
@@ -364,17 +364,18 @@ void funcionalidade9(char *path_1, char *path_2, int valor, Cabecalho *cab) {
 	}
 
 	inicializa_pagina(&page);
-
+	
 	le_header_BT(bt_fp, &header);
 	busca = busca_BT(bt_fp, header.noRaiz, valor, &found_RRN, &pos);
-	if (busca == -1) {
+	if(busca == -1){
 		printf("Registro inexistente.\n");
-		return;
 	}
-	busca_pagina_RRN(bt_fp, &page, found_RRN);
-	busca_registro_RRN(fp, &reg, busca);
-	exibe_registro(&reg);
-	printf("Quantidade de paginas da arvore-B acessadas: %d\n", page.n + 1);
+	else{
+		busca_pagina_RRN(bt_fp, &page, found_RRN);
+		busca_registro_RRN(fp, &reg, busca);
+		exibe_registro(&reg);
+		printf("Quantidade de paginas da arvore-B acessadas: %d\n", header.nroNiveis-page.nivel+1);
+	}
 	fecha_bin(fp, cab, 'r');
 	fclose(bt_fp);
 }
@@ -383,13 +384,15 @@ void funcionalidade10(char *path_1, char *path_2, Cabecalho *cab, int n)
 {	
 	FILE *bin_fp;
 	FILE *bt_fp;
-	bin_fp = abrir_bin(path_1, &cab, 'w'); 
+	bin_fp = abrir_bin(path_1, &cab, 'r'); 
 	if (!bin_fp) {
 		printf("Falha no processamento do arquivo.\n");
 		return;
 	}
-	fseek(bin_fp, 0, SEEK_SET);
+
+	fseek(bin_fp, 0, SEEK_SET); 
 	escreve_char_bin(bin_fp, '0'); // Marcando o arquivo como inconsistente.
+
 	int i;
 	Registro reg;
 
@@ -400,11 +403,11 @@ void funcionalidade10(char *path_1, char *path_2, Cabecalho *cab, int n)
 		return;
 	}
 
-
 	BT_header bt_header;
 	le_header_BT(bt_fp, &bt_header);
+	fseek(bt_fp, 0, SEEK_SET);
 	escreve_char_bin(bt_fp, '0');
-
+	BT_keys chave;
 	for(i=0; i<n; i++)
 	{
 		scan_quote_string(reg.cidadeMae);
@@ -421,39 +424,23 @@ void funcionalidade10(char *path_1, char *path_2, Cabecalho *cab, int n)
 		scan_quote_string(reg.estadoBebe);
 		reg.tamanhoCidadeMae = strlen(reg.cidadeMae);
 		reg.tamanhoCidadeBebe = strlen(reg.cidadeBebe);
+
 		fseek(bin_fp, 0, SEEK_END); // Sempre inserre no final do arquivo.
+		int RRN = (ftell(bin_fp)-128)/SIZE_REGISTRO;
 		escreve_registro_bin(bin_fp, &reg, cab);
-		
-		int RRN = (ftell(bin_fp)-SIZE_HEADER)/SIZE_REGISTRO;
-		int filho_promo;
-		BT_keys chave;
-		BT_keys chave_promo;
-		
+
 		chave.C = reg.idNascimento;
 		chave.Pr = RRN;
-		
-		if(insere_BT(bt_fp, bt_header.noRaiz, chave, &chave_promo, &filho_promo) == PROMOTION){
-			BT_page new_root;
-			inicializa_pagina(&new_root);
-			//Chaves
-			new_root.keys[0].C = chave_promo.C;
-			new_root.keys[0].Pr = chave_promo.Pr;
-			//Filhos
-			new_root.P[0] = bt_header.noRaiz;
-			new_root.P[1] = filho_promo;
-			
-			bt_header.noRaiz = bt_header.proxRRN;
-			bt_header.proxRRN += 1;
-			bt_header.nroNiveis += 1;
-		
-		
+
+		if(insere_BT(bt_fp, chave, &bt_header)){
+			printf("Falha no processamento do arquivo.\n");
+			return;
 		}
 
 	}
-	
+	escreve_header_BT(bt_fp, &bt_header);
 	fecha_bin(bin_fp, cab, 'w');
 	fseek(bt_fp, 0, SEEK_SET);
-	escreve_header_BT(bt_fp, &bt_header);
 	fclose(bt_fp);
 	binarioNaTela(path_2);
 }

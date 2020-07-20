@@ -70,18 +70,18 @@ int busca_BT(FILE *bt, int RRN, int chave, int *found_RRN, int *found_pos){
 }
 
 // Insertion Sort para ordenar as chaves.
-void insertionSort(BT_keys *chave, int RRN[]){
+void insertionSort(BT_page *page){
 	int i, j, aux;
-	for(i=0; i<BT_ORDER; i++){
-		aux = chave[i].C;
+	for(i=0; i<page->n; i++){
+		aux = page->keys[i].C;
 		j = i-1;
-		while(j>=0 && chave[j].C > aux){
-			chave[j+1].C = chave[j].C;
-			chave[j+1].Pr = chave[j].Pr;
-			RRN[j+2] = RRN[j+1];
+		while(j>=0 && page->keys[j].C > aux){
+			page->keys[j+1].C = page->keys[j].C;
+			page->keys[j+1].Pr = page->keys[j].Pr;
+			page->P[j+2] = page->P[j+1];
 			j--;
 		}
-		chave[j+1].C = aux;
+		page->keys[j+1].C = aux;
 	}
 }
 
@@ -106,7 +106,18 @@ void split(BT_header *header, BT_keys *nova_chave, int filho_dir_nova, BT_page *
 	aux_P[6] = filho_dir_nova;
 	
 	//Ordenando
-	insertionSort(aux_keys, aux_P);
+	int j, aux;
+	for(i=0; i<BT_ORDER; i++){
+		aux = aux_keys[i].C;
+		j = i-1;
+		while(j>=0 && aux_keys[j].C > aux){
+			aux_keys[j+1].C = aux_keys[j].C;
+			aux_keys[j+1].Pr = aux_keys[j].Pr;
+			aux_P[j+2] = aux_P[j+1];
+			j--;
+		}
+		aux_keys[j+1].C = aux;
+	}
 	
 	//Passando as chaves para a página.
 	for(i=0; i<BT_ORDER/2; i++){
@@ -141,16 +152,13 @@ void split(BT_header *header, BT_keys *nova_chave, int filho_dir_nova, BT_page *
 		
 //Retorna PROMOTION(overflow), NO_PROMOTION(página tem espaço), ERROR(chave já existe).
 
-int insere_BT(FILE *bt, int RRN, BT_keys chave, BT_keys *chave_promo, int *rrn_promo){
-	
+int insere_BT_rec(FILE *bt, BT_header *header, int RRN, BT_keys chave, BT_keys *chave_promo, int *rrn_promo){
 	int pos;
 	BT_keys p_b_chave; //chave promovida do nível inferior para ser inserida em page
 	int p_b_RRN; //RRN promovido do nível inferior para ser inserido em page
 	BT_page page, new_page;
 	int return_value;
 	
-	BT_header header;
-
 	inicializa_pagina(&page);
 	inicializa_pagina(&new_page);
 
@@ -161,7 +169,9 @@ int insere_BT(FILE *bt, int RRN, BT_keys chave, BT_keys *chave_promo, int *rrn_p
 		*rrn_promo = -1;
 		return PROMOTION;
 	}
-	
+
+	busca_pagina_RRN(bt, &page, RRN);
+
 	//Se a página não é um nó folha, a função é chamada recursivamente até que encontre
 	//a chave ou chegue ao nó folha.
 	int found_RRN; //Não vai ser usada nessa função.
@@ -169,35 +179,28 @@ int insere_BT(FILE *bt, int RRN, BT_keys chave, BT_keys *chave_promo, int *rrn_p
 	if(busca_BT(bt, RRN, chave.C, &found_RRN, &pos) != -1){
 		return ERROR;
 	}
-	
-	//Se chave não existe, encontrar em que descendente ela terá que ser inserida.
 	int new_RRN;
-	if(chave.C < page.keys[0].C){
-		new_RRN = page.P[0];
-	}else if(chave.C < page.keys[1].C){
-		new_RRN = page.P[1];
-	}else if(chave.C < page.keys[2].C){
-		new_RRN = page.P[2];
-	}else if(chave.C < page.keys[3].C){
-		new_RRN = page.P[3];
-	}else if(chave.C < page.keys[4].C){
-		new_RRN = page.P[4];
-	}else{
-		new_RRN = page.P[5];
-	}
+	for(pos = 0; pos<page.n; pos++){
+		if(chave.C < (page.keys[pos]).C)
+			new_RRN = page.P[pos];	
+		if(pos == page.n-1)
+			new_RRN = page.P[pos+1];
+	}	
 	
-	return_value = insere_BT(bt, new_RRN, chave, &p_b_chave, &p_b_RRN); 
+	return_value = insere_BT_rec(bt, header, new_RRN, chave, &p_b_chave, &p_b_RRN); 
 	
 	if(return_value == NO_PROMOTION || return_value == ERROR){
 		return return_value;
 	}else if(page.n < BT_ORDER-1){//Inserção sem particionamento
 		page.keys[page.n].C = chave.C;
 		page.keys[page.n].Pr = chave.Pr;
-		insertionSort(page.keys, page.P);	
+		page.n++;
+		insertionSort(&page);	
+		fseek(bt, RRN*SIZE_PAGE + SIZE_HEADER, SEEK_SET);
+		escreve_pagina_BT(bt, &page);
 		return NO_PROMOTION;
 	}else{//inserção sem particionamento, indicando chave promovida
-		le_header_BT(bt, &header);
-		split(&header, &p_b_chave, p_b_RRN, &page, chave_promo, rrn_promo, &new_page); 
+		split(header, &p_b_chave, p_b_RRN, &page, chave_promo, rrn_promo, &new_page); 
 		
 		//Atualiza page
 		fseek(bt, RRN*SIZE_PAGE + SIZE_HEADER, SEEK_SET);
@@ -206,11 +209,59 @@ int insere_BT(FILE *bt, int RRN, BT_keys chave, BT_keys *chave_promo, int *rrn_p
 		//Escreve new_page
 		fseek(bt, (*rrn_promo)*SIZE_PAGE + SIZE_HEADER, SEEK_SET);
 		escreve_pagina_BT(bt, &new_page);
-		header.nroChaves += 1;
-		header.proxRRN += 1;
+		header->nroChaves++;
+		header->proxRRN++;
 		
 		return PROMOTION;
 	}
+}
+
+int insere_BT(FILE *bt, BT_keys chave, BT_header *header){
+	//BT_header header;
+	//le_header_BT(bt, &header);
+	if(header->noRaiz == -1){
+		BT_page root;
+		inicializa_pagina(&root);
+		root.keys[0].C = chave.C;
+		root.keys[0].Pr = chave.Pr;
+		root.n = 1;
+		root.nivel = 1;
+		fseek(bt, SIZE_HEADER, SEEK_SET);
+		escreve_pagina_BT(bt, &root);
+		header->nroChaves = 1;
+		header->noRaiz = 0;
+		header->proxRRN = 1;
+		header->nroNiveis = 1;
+		escreve_header_BT(bt, header);
+	}
+	else{
+		int filho_promo;
+		BT_keys chave_promo;
+		
+		int busca = insere_BT_rec(bt, header, header->noRaiz, chave, &chave_promo, &filho_promo);
+		if(busca == PROMOTION){
+			BT_page new_root;
+			inicializa_pagina(&new_root);
+			//Chaves
+			new_root.keys[0].C = chave_promo.C;
+			new_root.keys[0].Pr = chave_promo.Pr;
+			//Filhos
+			new_root.P[0] = header->noRaiz;
+			new_root.P[1] = filho_promo;
+			new_root.nivel = header->nroNiveis+1;
+			new_root.n = 1;	
+
+			header->noRaiz = header->proxRRN;
+			escreve_header_BT(bt, header);
+			header->proxRRN++;
+			header->nroNiveis++;
+		
+		}
+		else if(busca == ERROR) return 1;
+
+		header->nroChaves++;		
+	}
+	return 0;
 }
 
 //Rotina inicializadora e de tratamento da raiz.
@@ -251,32 +302,14 @@ void driver_BT(char *b_tree, FILE *fp){
 	
 	BT_keys chave = {-1, -1};
 	int RRN_fp;
-	int filho_promo;
-   	BT_keys	chave_promo;
 
 	//Enquanto existir uma chave
 	while(1){
 		RRN_fp = (ftell(fp)-SIZE_HEADER)/SIZE_REGISTRO; //RRN do registro a ser lido.
 		if(le_registro_bin(fp, &reg) < 1) break; //Acabaram os registros.
-		
 		chave.C = reg.idNascimento;
-		chave.Pr = RRN_fp;
-		
-		if(insere_BT(bt, header->noRaiz, chave, &chave_promo, &filho_promo) == PROMOTION){
-			BT_page new_root;
-			inicializa_pagina(&new_root);
-			//Chaves
-			new_root.keys[0].C = chave_promo.C;
-			new_root.keys[0].Pr = chave_promo.Pr;
-			//Filhos
-			new_root.P[0] = header->noRaiz;
-			new_root.P[1] = filho_promo;
-			
-			header->noRaiz = header->proxRRN;
-			header->proxRRN += 1;
-			header->nroNiveis += 1;
-		
-		}
+		chave.Pr = RRN_fp;	
+		insere_BT(bt, chave, header);
 	}
 	
 	escreve_header_BT(bt, header);	
