@@ -50,34 +50,23 @@ int busca_BT(FILE *bt, int RRN, int chave, int *found_RRN, int *found_pos){
 	
 	//Ler pagina a partir de seu RRN.
 	busca_pagina_RRN(bt, &page, RRN);	
-
+	
 	//Procurando pela chave nessa página.
 	//Se achar, retorna o RRN do registro do arquivo de dados.
-	for(pos = 0; pos<BT_ORDER-1; pos++){
+	for(pos = 0; pos<page.n; pos++){
 		if(page.keys[pos].C == chave){
 			*found_pos = pos;
 			*found_RRN = RRN;
 			return page.keys[pos].Pr; //RRN do registro do arquivo de dados.
 		}
+		if(chave < (page.keys[pos]).C)
+			return busca_BT(bt, page.P[pos], chave, found_RRN, found_pos);
+		
+		if(pos == page.n-1)
+			return busca_BT(bt, page.P[pos+1], chave, found_RRN, found_pos);
+	
 	}
-	//Se não achar, chama busca recursiva no descendente.
-	int new_RRN;
-	if(chave < (page.keys[0]).C){
-		new_RRN = page.P[0];
-	}else if(chave < page.keys[1].C){
-		new_RRN = page.P[1];
-	}else if(chave < page.keys[2].C){
-		new_RRN = page.P[2];
-	}else if(chave < page.keys[3].C){
-		new_RRN = page.P[3];
-	}else if(chave < page.keys[4].C){
-		new_RRN = page.P[4];
-	}else{
-		new_RRN = page.P[5];
-	}
-
-	return busca_BT(bt, new_RRN, chave, found_RRN, found_pos);
-
+	return -1;
 }
 
 // Insertion Sort para ordenar as chaves.
