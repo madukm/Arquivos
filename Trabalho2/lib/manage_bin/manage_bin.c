@@ -20,6 +20,7 @@
 
 //Em caso de erro na abertura do arquivo para leitura, retorna-se NULL e é printada
 //a mensagem ERROR_MSG
+
 FILE* abrir_bin(char path[], Cabecalho** cab, char op) {
     FILE* fp = NULL;
 
@@ -420,7 +421,7 @@ void le_header_BT(FILE *bt, BT_header *header){
 	le_inteiro_bin(bt, &(header->nroNiveis));
 	le_inteiro_bin(bt, &(header->proxRRN));
 	le_inteiro_bin(bt, &(header->nroChaves));
-	
+	fseek(bt, 55, SEEK_CUR);	
 	return;
 }
 
